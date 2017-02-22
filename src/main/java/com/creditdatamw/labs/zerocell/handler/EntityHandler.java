@@ -55,8 +55,8 @@ public class EntityHandler<T> {
     @SuppressWarnings("unchecked")
     private EntityExcelSheetHandler<T> createSheetHandler(Class<T> clazz) {
         Field[] fieldArray = clazz.getDeclaredFields();
-        Set<ColumnInfo> columns = new HashSet<>(fieldArray.length);
-
+        final ColumnInfo[] columns = new ColumnInfo[fieldArray.length];
+        int indexed = 0;
         for (Field field: fieldArray) {
             Column annotation = field.getAnnotation(Column.class);
             if (! Objects.isNull(annotation)) {
@@ -65,23 +65,25 @@ public class EntityHandler<T> {
                 // if (converter.getSuperclass() != Converter.class) {
                 //    throw new ZeroCellException(String.format("Converter must be subclass of the %s class", Converter.class.getName()));
                 //}
+                int index = annotation.index();
+                if (! Objects.isNull(columns[index])) {
+                    throw new ZeroCellException("Cannot map two columns to the same index: " + index);
+                }
 
-                columns.add(new ColumnInfo(annotation.name(),
-                                           field.getName(),
-                                           annotation.index(),
-                                           annotation.dataFormat(),
-                                           field.getType(),
-                                           converter));
+                columns[index] = new ColumnInfo(annotation.name(),
+                                               field.getName(),
+                                               annotation.index(),
+                                               annotation.dataFormat(),
+                                               field.getType(),
+                                               converter);
+                indexed++;
             }
         }
 
-        if (columns.isEmpty()) {
+        if (indexed < 1) {
             throw new ZeroCellException(String.format("Class %s does not have @Column annotations", clazz.getName()));
         }
-        ColumnInfo[] array = new ColumnInfo[columns.size()];
-        columns.forEach(col -> array[col.getIndex()] = col );
-        columns.clear();
-        return new EntityExcelSheetHandler(array);
+        return new EntityExcelSheetHandler(columns);
     }
 
     /**
