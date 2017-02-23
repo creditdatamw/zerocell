@@ -26,7 +26,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.sql.Timestamp;
+import java.sql.*;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -269,6 +270,8 @@ public class EntityHandler<T> {
                 value = String.valueOf(formattedValue);
             } else if (fieldType == LocalDateTime.class || fieldType == LocalDate.class) {
                 value = parseAsLocalDate(columnName, rowNum, formattedValue);
+            } else if (fieldType == java.sql.Date.class) {
+                value = Date.valueOf(parseAsLocalDate(columnName, rowNum, formattedValue));
             } else if (fieldType == Timestamp.class) {
                 value = Timestamp.valueOf(formattedValue == null ? "1905-01-01" : formattedValue);;
             } else if (fieldType == Integer.class || fieldType == int.class) {

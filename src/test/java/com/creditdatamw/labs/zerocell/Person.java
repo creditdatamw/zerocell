@@ -7,6 +7,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
+import java.sql.Date;
 import java.time.LocalDate;
 
 /**
@@ -35,6 +36,11 @@ public class Person {
     @Past
     @Column(name = "DATE_OF_BIRTH", index = 4, convertorClass = LocalDateConverter.class)
     private LocalDate dateOfBirth;
+
+    @NotNull
+    @Past
+    @Column(name = "DATE_REGISTERED", index = 6)
+    private Date dateOfRegistration;
 
     @Column(name = "FAV_NUMBER", index = 5)
     private int favouriteNumber;
@@ -79,6 +85,14 @@ public class Person {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
+    }
+
+    public Date getDateOfRegistration() {
+        return dateOfRegistration;
+    }
+
+    public void setDateOfRegistration(Date dateOfRegistration) {
+        this.dateOfRegistration = dateOfRegistration;
     }
 
     public LocalDate getDateOfBirth() {
