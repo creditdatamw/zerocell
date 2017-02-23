@@ -26,11 +26,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.sql.*;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 public class EntityHandler<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityHandler.class);
@@ -269,46 +272,63 @@ public class EntityHandler<T> {
             if (fieldType == String.class) {
                 value = String.valueOf(formattedValue);
             } else if (fieldType == LocalDateTime.class || fieldType == LocalDate.class) {
+
                 value = parseAsLocalDate(columnName, rowNum, formattedValue);
+
             } else if (fieldType == java.sql.Date.class) {
-                value = Date.valueOf(parseAsLocalDate(columnName, rowNum, formattedValue));
+
+                LocalDate localDateValue = parseAsLocalDate(columnName, rowNum, formattedValue);
+                value = Objects.isNull(localDateValue) ? localDateValue : Date.valueOf(localDateValue);
+
             } else if (fieldType == Timestamp.class) {
-                value = Timestamp.valueOf(formattedValue == null ? "1905-01-01" : formattedValue);;
+
+                value = Timestamp.valueOf(formattedValue == null ? "1905-01-01" : formattedValue);
+
             } else if (fieldType == Integer.class || fieldType == int.class) {
+
                 try {
                     value = Integer.valueOf(formattedValue == null ? "0.0" : formattedValue);
                 } catch(Exception e) {
                     value = new Integer(-1);
                     LOGGER.error("Failed to parse {} as integer. Using default of -1 at column={} row={} ", formattedValue, columnName, rowNum);
                 }
+
             } else if (fieldType == Long.class || fieldType == long.class) {
+
                 try {
                     value = Long.valueOf(formattedValue == null ? "0" : formattedValue);
                 } catch(Exception e) {
                     value = new Integer(-1);
                     LOGGER.error("Failed to parse {} as long. Using default of -1 at column={} row={} ", formattedValue, columnName, rowNum);
                 }
+
             } else if (fieldType == Double.class || fieldType == double.class) {
+
                 try {
                     value = Double.valueOf(formattedValue == null ? "0.0" : formattedValue);
                 } catch(Exception e) {
                     value = new Double(-1.0);
                     LOGGER.error("Failed to parse {} as double. Using default of -1 at column={} row={} ", formattedValue, columnName, rowNum);
                 }
+
             } else if (fieldType == Float.class || fieldType == float.class) {
+
                 try {
                     value = Float.valueOf(formattedValue == null ? "0.0" : formattedValue);
                 } catch(Exception e) {
                     value = new Float(-1.0);
                     LOGGER.error("Failed to parse {} as float. Using default of -1 at column={} row={} ", formattedValue, columnName, rowNum);
                 }
+
             } else if (fieldType == Boolean.class) {
+
                 try {
                     value = Boolean.valueOf(formattedValue == null ? "FALSE" : "TRUE");
                 } catch(Exception e) {
                     value = null;
                     LOGGER.error("Failed to parse {} as Boolean. Using default of null at column={} row={} ", formattedValue, columnName, rowNum);
                 }
+
             }
             return value;
         }
@@ -322,11 +342,12 @@ public class EntityHandler<T> {
         }
 
         private LocalDate parseAsLocalDate(String columnName, int rowNum, String value) {
-            LocalDate date = HandlerUtils.parseAsLocalDate(columnName, rowNum, value);
-            if (Objects.isNull(date)) {
+            try {
+                return LocalDate.parse(value);
+            } catch(Exception e) {
                 LOGGER.error("Failed to parse {} value={} from row={}", columnName, value, rowNum);
             }
-            return date;
+            return null;
         }
 
         @Override
