@@ -126,7 +126,7 @@ public class EntityHandler<T> {
             }
 
             if (Objects.isNull(sheetInputStream)) {
-                throw new ZeroCellException("Failed to find 'uploads' sheet in Excel Workbook");
+                throw new ZeroCellException(String.format("Could not find sheet %s", sheetName));
             }
 
             XMLReader xmlReader = SAXHelper.newXMLReader();
@@ -190,7 +190,7 @@ public class EntityHandler<T> {
                     writeColumnField(cur, String.valueOf(i), rowNumberColumn, i);
                 }
             } catch (InstantiationException | IllegalAccessException e) {
-                throw new ZeroCellException("Failed to create and instance of " + type.getName());
+                throw new ZeroCellException("Failed to create and instance of " + type.getName(), e);
             }
         }
 
