@@ -2,6 +2,7 @@ package com.creditdatamw.labs.zerocell.handler;
 
 import com.creditdatamw.labs.zerocell.ZeroCellException;
 import com.creditdatamw.labs.zerocell.annotation.Column;
+import com.creditdatamw.labs.zerocell.annotation.RowNumber;
 import com.creditdatamw.labs.zerocell.column.ColumnInfo;
 import com.creditdatamw.labs.zerocell.converter.Converter;
 import com.creditdatamw.labs.zerocell.converter.NoopConverter;
@@ -28,10 +29,7 @@ import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class EntityHandler<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityHandler.class);
@@ -53,8 +51,17 @@ public class EntityHandler<T> {
     private EntityExcelSheetHandler<T> createSheetHandler(Class<T> clazz) {
         Field[] fieldArray = clazz.getDeclaredFields();
         final ColumnInfo[] columns = new ColumnInfo[fieldArray.length];
+        ColumnInfo rowNumberColumn = null;
         int indexed = 0;
         for (Field field: fieldArray) {
+
+            RowNumber rowNumberAnnotation = field.getAnnotation(RowNumber.class);
+
+            if (! Objects.isNull(rowNumberAnnotation)) {
+                rowNumberColumn = new ColumnInfo("__id__", field.getName(), -1, null,Integer.class, NoopConverter.class);
+                continue;
+            }
+
             Column annotation = field.getAnnotation(Column.class);
             if (! Objects.isNull(annotation)) {
                 Class<?> converter = annotation.convertorClass();
@@ -80,7 +87,7 @@ public class EntityHandler<T> {
         if (indexed < 1) {
             throw new ZeroCellException(String.format("Class %s does not have @Column annotations", clazz.getName()));
         }
-        return new EntityExcelSheetHandler(columns);
+        return new EntityExcelSheetHandler(rowNumberColumn, columns);
     }
 
     /**
@@ -138,6 +145,7 @@ public class EntityHandler<T> {
     private final class EntityExcelSheetHandler<T> implements XSSFSheetXMLHandler.SheetContentsHandler {
         private final Logger LOGGER = LoggerFactory.getLogger(EntityExcelSheetHandler.class);
 
+        private final ColumnInfo rowNumberColumn;
         private final ColumnInfo[] columns;
         private final List<T> entities;
 
@@ -147,7 +155,8 @@ public class EntityHandler<T> {
         private int currentCol = -1;
         private T cur;
 
-        EntityExcelSheetHandler(ColumnInfo[] columns) {
+        EntityExcelSheetHandler(ColumnInfo rowNumberColumn, ColumnInfo[] columns) {
+            this.rowNumberColumn = rowNumberColumn;
             this.columns = columns;
             this.entities = new ArrayList<>();
         }
@@ -175,10 +184,13 @@ public class EntityHandler<T> {
             isHeaderRow = false;
             try {
                 cur = (T) type.newInstance();
+                // Write to the field with the @RowNumber annotation here if it exists
+                if (! Objects.isNull(rowNumberColumn)) {
+                    writeColumnField(cur, String.valueOf(i), rowNumberColumn, i);
+                }
             } catch (InstantiationException | IllegalAccessException e) {
                 throw new ZeroCellException("Failed to create and instance of " + type.getName());
             }
-            // cur.setRowNumber(currentRow);
         }
 
         @Override
@@ -209,6 +221,8 @@ public class EntityHandler<T> {
 
             writeColumnField(cur, formattedValue, currentColumnInfo, currentRow);
         }
+
+
 
         /**
          * Write the value read from the excel cell to a field

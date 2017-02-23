@@ -26,6 +26,7 @@ public class TestReader {
 
         Person zikani = people.get(0);
 
+        assertEquals(1, zikani.getRowNumber());
         assertEquals("Zikani", zikani.getFirstName());
     }
 
