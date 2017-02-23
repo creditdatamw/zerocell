@@ -1,5 +1,6 @@
 package com.creditdatamw.labs.zerocell;
 
+import com.creditdatamw.labs.zerocell.column.ColumnInfo;
 import com.creditdatamw.labs.zerocell.handler.EntityHandler;
 
 import java.io.File;
@@ -10,6 +11,10 @@ import java.util.Objects;
  * Main API for ZeroCell
  */
 public class Reader {
+
+    public static <T> String[] columnsOf(Class<T> clazz) {
+        return ColumnInfo.columnsOf(clazz);
+    }
 
     public static <T> ReaderBuilder of(Class<T> clazz) {
         return new ReaderBuilder<>(clazz);
