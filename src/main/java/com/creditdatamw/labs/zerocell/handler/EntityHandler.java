@@ -4,6 +4,7 @@ import com.creditdatamw.labs.zerocell.ZeroCellException;
 import com.creditdatamw.labs.zerocell.annotation.Column;
 import com.creditdatamw.labs.zerocell.column.ColumnInfo;
 import com.creditdatamw.labs.zerocell.converter.Converter;
+import com.creditdatamw.labs.zerocell.converter.NoopConverter;
 import org.apache.poi.hssf.util.CellReference;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -20,16 +21,10 @@ import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
 import javax.validation.ValidationException;
-import java.beans.BeanInfo;
-import java.beans.IntrospectionException;
-import java.beans.Introspector;
-import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -228,52 +223,77 @@ public class EntityHandler<T> {
             String fieldName = currentColumnInfo.getFieldName();
             try {
                 Converter converter = (Converter) currentColumnInfo.getConverterClass().newInstance();
-
-                BeanInfo infos = Introspector.getBeanInfo(object.getClass());
-                PropertyDescriptor[] props = infos.getPropertyDescriptors();
-
-                for (PropertyDescriptor prop : props) {
-                    if (Objects.equals("class", prop.getName())) {
-                        continue;
-                    }
-
-                    // Skip fields we are not interested in
-                    if (!Objects.equals(fieldName, prop.getName())) {
-                        continue;
-                    }
-
-                    Object value = converter.convert(formattedValue);
-
-                    if (prop.getPropertyType() == String.class) {
-                        value = String.valueOf(formattedValue);
-                    } else if (prop.getPropertyType() == LocalDateTime.class || prop.getPropertyType() == LocalDate.class) {
-                        value = parseAsLocalDate(currentColumnInfo.getName(), rowNum, formattedValue);
-                    } else if (prop.getPropertyType() == Timestamp.class) {
-                        value = Timestamp.valueOf(formattedValue == null ? "1905-01-01" : formattedValue);;
-                    } else if (prop.getPropertyType() == Integer.class) {
-                        value = Integer.valueOf(formattedValue == null ? "0.0" : formattedValue);
-                    } else if (prop.getPropertyType() == Long.class) {
-                        value = Long.valueOf(formattedValue == null ? "0" : formattedValue);
-                    } else if (prop.getPropertyType() == Double.class) {
-                        value = Double.valueOf(formattedValue == null ? "0.0" : formattedValue);
-                    } else if (prop.getPropertyType() == Float.class) {
-                        value = Float.valueOf(formattedValue == null ? "0.0" : formattedValue);
-                    } else if (prop.getPropertyType() == Boolean.class) {
-                        value = Boolean.valueOf(formattedValue == null ? "FALSE" : "TRUE");
-                    }
-                    Method writeMethod = prop.getWriteMethod();
-                    if (writeMethod != null) {
-                        writeMethod.invoke(object, value);
+                Object value = null;
+                // Don't use a converter if there isn't a custom one
+                if (converter instanceof NoopConverter) {
+                    value = convertValueToType(currentColumnInfo.getType(), formattedValue, currentColumnInfo.getName(), rowNum);
+                } else {
+                    // Handle any exceptions thrown by the converter - this stops execution of the whole process
+                    try {
+                        value = converter.convert(formattedValue);
+                    } catch(Exception e) {
+                        new ZeroCellException(String.format("%s threw an exception while trying to convert value %s ", converter.getClass().getName(), formattedValue), e);
                     }
                 }
-
+                Field field = type.getDeclaredField(currentColumnInfo.getFieldName());
+                boolean access = field.isAccessible();
+                if (! access) {
+                    field.setAccessible(true);
+                }
+                field.set(cur, value);
+                field.setAccessible(field.isAccessible() && access);
             } catch (IllegalArgumentException e) {
                 throw new ZeroCellException(String.format("Failed to write value %s to field %s at row %s", formattedValue, fieldName, rowNum));
-            } catch (InstantiationException e) {
-                LOGGER.error("Failed to set field", e);
-            } catch (IntrospectionException | InvocationTargetException | IllegalAccessException e) {
-                LOGGER.error("Failed to set field: {}", fieldName);
+            } catch (InstantiationException | NoSuchFieldException | IllegalAccessException e) {
+                LOGGER.error("Failed to set field: {}", fieldName, e);
             }
+        }
+
+        public Object convertValueToType(Class<?> fieldType, String formattedValue, String columnName, int rowNum) {
+            Object value = null;
+            if (fieldType == String.class) {
+                value = String.valueOf(formattedValue);
+            } else if (fieldType == LocalDateTime.class || fieldType == LocalDate.class) {
+                value = parseAsLocalDate(columnName, rowNum, formattedValue);
+            } else if (fieldType == Timestamp.class) {
+                value = Timestamp.valueOf(formattedValue == null ? "1905-01-01" : formattedValue);;
+            } else if (fieldType == Integer.class || fieldType == int.class) {
+                try {
+                    value = Integer.valueOf(formattedValue == null ? "0.0" : formattedValue);
+                } catch(Exception e) {
+                    value = new Integer(-1);
+                    LOGGER.error("Failed to parse {} as integer. Using default of -1 at column={} row={} ", formattedValue, columnName, rowNum);
+                }
+            } else if (fieldType == Long.class || fieldType == long.class) {
+                try {
+                    value = Long.valueOf(formattedValue == null ? "0" : formattedValue);
+                } catch(Exception e) {
+                    value = new Integer(-1);
+                    LOGGER.error("Failed to parse {} as long. Using default of -1 at column={} row={} ", formattedValue, columnName, rowNum);
+                }
+            } else if (fieldType == Double.class || fieldType == double.class) {
+                try {
+                    value = Double.valueOf(formattedValue == null ? "0.0" : formattedValue);
+                } catch(Exception e) {
+                    value = new Double(-1.0);
+                    LOGGER.error("Failed to parse {} as double. Using default of -1 at column={} row={} ", formattedValue, columnName, rowNum);
+                }
+            } else if (fieldType == Float.class || fieldType == float.class) {
+                try {
+                    value = Float.valueOf(formattedValue == null ? "0.0" : formattedValue);
+                } catch(Exception e) {
+                    value = new Float(-1.0);
+                    LOGGER.error("Failed to parse {} as float. Using default of -1 at column={} row={} ", formattedValue, columnName, rowNum);
+                }
+            } else if (fieldType == Boolean.class) {
+                try {
+                    value = Boolean.valueOf(formattedValue == null ? "FALSE" : "TRUE");
+                } catch(Exception e) {
+                    value = null;
+                    LOGGER.error("Failed to parse {} as Boolean. Using default of null at column={} row={} ", formattedValue, columnName, rowNum);
+                }
+            }
+            return value;
         }
 
         private void assertColumnName(String columnName, String value) {

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 	
 	<groupId>com.creditdatamw.labs</groupId>
-	<version>0.1.0</version>
+	<version>0.1.1</version>
     <artifactId>zerocell</artifactId>
 	<name>ZeroCell</name>
 	<description>Read from Excel files to POJO's really fast!</description>

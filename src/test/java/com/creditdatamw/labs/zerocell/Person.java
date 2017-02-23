@@ -2,6 +2,7 @@ package com.creditdatamw.labs.zerocell;
 
 import com.creditdatamw.labs.zerocell.annotation.Column;
 import com.creditdatamw.labs.zerocell.annotation.RowNumber;
+import com.creditdatamw.labs.zerocell.converter.LocalDateConverter;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
@@ -32,8 +33,11 @@ public class Person {
 
     @NotNull
     @Past
-    @Column(name = "DATE_OF_BIRTH", index = 4)
+    @Column(name = "DATE_OF_BIRTH", index = 4, convertorClass = LocalDateConverter.class)
     private LocalDate dateOfBirth;
+
+    @Column(name = "FAV_NUMBER", index = 5)
+    private int favouriteNumber;
 
     public Person() { }
 
@@ -83,5 +87,13 @@ public class Person {
 
     public void setDateOfBirth(LocalDate dateOfBirth) {
         this.dateOfBirth = dateOfBirth;
+    }
+
+    public int getFavouriteNumber() {
+        return favouriteNumber;
+    }
+
+    public void setFavouriteNumber(int favouriteNumber) {
+        this.favouriteNumber = favouriteNumber;
     }
 }

@@ -8,6 +8,10 @@ import java.time.LocalDate;
 public class LocalDateConverter implements  Converter<LocalDate> {
     @Override
     public LocalDate convert(String value) {
-        return LocalDate.parse(value);
+        try {
+            return LocalDate.parse(value);
+        } catch(Exception e) {
+            return LocalDate.of(1905, 01, 01);
+        }
     }
 }
