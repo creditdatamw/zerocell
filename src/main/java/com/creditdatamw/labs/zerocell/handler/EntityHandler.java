@@ -14,7 +14,6 @@ import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
 import org.apache.poi.xssf.model.StylesTable;
 import org.apache.poi.xssf.usermodel.XSSFComment;
-import org.apache.tools.ant.taskdefs.Local;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.InputSource;
@@ -34,7 +33,10 @@ import java.lang.reflect.Method;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 
 public class EntityHandler<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityHandler.class);
@@ -236,17 +238,28 @@ public class EntityHandler<T> {
                     }
 
                     // Skip fields we are not interested in
-                    if (! Objects.equals(fieldName, prop.getName())) {
+                    if (!Objects.equals(fieldName, prop.getName())) {
                         continue;
                     }
 
                     Object value = converter.convert(formattedValue);
-                    if (prop.getPropertyType() == LocalDateTime.class || prop.getPropertyType() == LocalDate.class) {
+
+                    if (prop.getPropertyType() == String.class) {
+                        value = String.valueOf(formattedValue);
+                    } else if (prop.getPropertyType() == LocalDateTime.class || prop.getPropertyType() == LocalDate.class) {
                         value = parseAsLocalDate(currentColumnInfo.getName(), rowNum, formattedValue);
                     } else if (prop.getPropertyType() == Timestamp.class) {
-                        value = Timestamp.valueOf(formattedValue);
-                    } else if (prop.getPropertyType() == Integer.class || prop.getPropertyType() == Long.class){
-                        value = Timestamp.valueOf(formattedValue).toInstant().toEpochMilli();
+                        value = Timestamp.valueOf(formattedValue == null ? "1905-01-01" : formattedValue);;
+                    } else if (prop.getPropertyType() == Integer.class) {
+                        value = Integer.valueOf(formattedValue == null ? "0.0" : formattedValue);
+                    } else if (prop.getPropertyType() == Long.class) {
+                        value = Long.valueOf(formattedValue == null ? "0" : formattedValue);
+                    } else if (prop.getPropertyType() == Double.class) {
+                        value = Double.valueOf(formattedValue == null ? "0.0" : formattedValue);
+                    } else if (prop.getPropertyType() == Float.class) {
+                        value = Float.valueOf(formattedValue == null ? "0.0" : formattedValue);
+                    } else if (prop.getPropertyType() == Boolean.class) {
+                        value = Boolean.valueOf(formattedValue == null ? "FALSE" : "TRUE");
                     }
                     Method writeMethod = prop.getWriteMethod();
                     if (writeMethod != null) {
@@ -254,6 +267,8 @@ public class EntityHandler<T> {
                     }
                 }
 
+            } catch (IllegalArgumentException e) {
+                throw new ZeroCellException(String.format("Failed to write value %s to field %s at row %s", formattedValue, fieldName, rowNum));
             } catch (InstantiationException e) {
                 LOGGER.error("Failed to set field", e);
             } catch (IntrospectionException | InvocationTargetException | IllegalAccessException e) {
