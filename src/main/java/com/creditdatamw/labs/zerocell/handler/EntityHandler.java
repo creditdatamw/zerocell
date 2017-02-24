@@ -51,6 +51,13 @@ public class EntityHandler<T> {
         this.entitySheetHandler = createSheetHandler(clazz);
     }
 
+    public EntityHandler(Class<T> clazz, String sheetName) {
+        Objects.requireNonNull(clazz);
+        this.type = clazz;
+        this.sheetName = sheetName;
+        this.entitySheetHandler = createSheetHandler(clazz);
+    }
+
     @SuppressWarnings("unchecked")
     private EntityExcelSheetHandler<T> createSheetHandler(Class<T> clazz) {
         Field[] fieldArray = clazz.getDeclaredFields();
@@ -277,9 +284,12 @@ public class EntityHandler<T> {
 
             } else if (fieldType == java.sql.Date.class) {
 
-                LocalDate localDateValue = parseAsLocalDate(columnName, rowNum, formattedValue);
-                value = Objects.isNull(localDateValue) ? localDateValue : Date.valueOf(localDateValue);
-
+                try {
+                    value = Objects.isNull(formattedValue) ? formattedValue : Date.valueOf(formattedValue);
+                } catch (Exception e) {
+                    LOGGER.error("Failed to parse {} as Date. Using default of null at column={} row={} ", formattedValue, columnName, rowNum);
+                    value = null;
+                }
             } else if (fieldType == Timestamp.class) {
 
                 value = Timestamp.valueOf(formattedValue == null ? "1905-01-01" : formattedValue);
@@ -336,7 +346,7 @@ public class EntityHandler<T> {
         private void assertColumnName(String columnName, String value) {
             if (validateHeaders && isHeaderRow) {
                 if (! columnName.equalsIgnoreCase(value)){
-                    throw new ValidationException(String.format("Expected Column '%s' but found '%s'", columnName, value));
+                    throw new ZeroCellException(String.format("Expected Column '%s' but found '%s'", columnName, value));
                 }
             }
         }

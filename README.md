@@ -31,7 +31,7 @@ Add the following to your `pom.xml`
 <dependency>
     <groupId>com.creditdatamw.labs</groupId>
     <artifactId>zerocell</artifactId>
-    <version>0.1.3</version>
+    <version>0.1.4</version>
 </dependency>
 ```
 
@@ -60,15 +60,11 @@ Then using the `Reader` class you can load a list from the excel file as follows
 ```java
 List<Person> people = Reader.of(Person.class)
                             .from(new File("people.xlsx"))
+                            .sheet("Sheet 1")
                             .list();
 ```
 
 ## Gotchas
-
-### Excel sheet naming
-
-* Currently, there is a requirement that the Excel sheet you want to load data from must be named `uploads`.
-This will be fixed in a later version.
 
 ### Exceptions
 

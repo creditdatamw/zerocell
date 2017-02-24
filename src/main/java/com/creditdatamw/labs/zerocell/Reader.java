@@ -23,6 +23,7 @@ public class Reader {
     public static final class ReaderBuilder<T> {
         private final Class<T> clazz;
         private File file;
+        private String sheetName;
 
         public ReaderBuilder(Class<T> clazz) {
             this.clazz = clazz;
@@ -34,8 +35,14 @@ public class Reader {
             return this;
         }
 
+        public ReaderBuilder sheet(String sheetName) {
+            Objects.requireNonNull(sheetName);
+            this.sheetName = sheetName;
+            return this;
+        }
+
         public <T> List<T> list() {
-            EntityHandler<T> entityHandler = new EntityHandler(clazz);
+            EntityHandler<T> entityHandler = Objects.isNull(sheetName) ? new EntityHandler(clazz) : new EntityHandler(clazz, sheetName);
             entityHandler.parseExcel(file);
             return entityHandler.readAsList();
         }

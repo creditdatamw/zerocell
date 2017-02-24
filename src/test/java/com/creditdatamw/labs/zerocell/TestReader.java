@@ -19,6 +19,7 @@ public class TestReader {
     public void testShouldExtractPeopleFromFile() {
         List<Person> people = Reader.of(Person.class)
                                 .from(new File("src/test/resources/test_people.xlsx"))
+                                .sheet("uploads")
                                 .list();
         assertNotNull(people);
         assertFalse(people.isEmpty());
