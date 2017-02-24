@@ -6,9 +6,7 @@ import org.junit.Test;
 import java.io.File;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 
 /**
  * Unit Tests for the reader class
@@ -31,4 +29,12 @@ public class TestReader {
         assertEquals("Zikani", zikani.getFirstName());
     }
 
+    @Test
+    public void testShouldExtractColumns() {
+        String[] columnNames = new String[] {
+            "ID", "FIRST_NAME", "MIDDLE_NAME", "LAST_NAME", "DATE_OF_BIRTH", "FAV_NUMBER", "DATE_REGISTERED"
+        };
+
+        assertArrayEquals(columnNames, Reader.columnsOf(Person.class));
+    }
 }
