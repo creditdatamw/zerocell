@@ -61,9 +61,8 @@ public class EntityHandler<T> {
     @SuppressWarnings("unchecked")
     private EntityExcelSheetHandler<T> createSheetHandler(Class<T> clazz) {
         Field[] fieldArray = clazz.getDeclaredFields();
-        final ColumnInfo[] columns = new ColumnInfo[fieldArray.length];
+        ArrayList<ColumnInfo> list = new ArrayList<>(fieldArray.length);
         ColumnInfo rowNumberColumn = null;
-        int indexed = 0;
         for (Field field: fieldArray) {
 
             RowNumber rowNumberAnnotation = field.getAnnotation(RowNumber.class);
@@ -76,28 +75,29 @@ public class EntityHandler<T> {
             Column annotation = field.getAnnotation(Column.class);
             if (! Objects.isNull(annotation)) {
                 Class<?> converter = annotation.convertorClass();
-
-                // if (converter.getSuperclass() != Converter.class) {
-                //    throw new ZeroCellException(String.format("Converter must be subclass of the %s class", Converter.class.getName()));
-                //}
-                int index = annotation.index();
-                if (! Objects.isNull(columns[index])) {
-                    throw new ZeroCellException("Cannot map two columns to the same index: " + index);
-                }
-
-                columns[index] = new ColumnInfo(annotation.name(),
-                                               field.getName(),
-                                               annotation.index(),
-                                               annotation.dataFormat(),
-                                               field.getType(),
-                                               converter);
-                indexed++;
+                list.add(new ColumnInfo(annotation.name(),
+                                       field.getName(),
+                                       annotation.index(),
+                                       annotation.dataFormat(),
+                                       field.getType(),
+                                       converter));
             }
         }
 
-        if (indexed < 1) {
+        if (list.isEmpty()) {
             throw new ZeroCellException(String.format("Class %s does not have @Column annotations", clazz.getName()));
         }
+        list.trimToSize();
+        final ColumnInfo[] columns = new ColumnInfo[list.size()];
+        int index = 0;
+        for(ColumnInfo columnInfo: list) {
+            index = columnInfo.getIndex();
+            if (! Objects.isNull(columns[index])) {
+                throw new ZeroCellException("Cannot map two columns to the same index: " + index);
+            }
+            columns[index] = columnInfo;
+        }
+        list = null;
         return new EntityExcelSheetHandler(rowNumberColumn, columns);
     }
 
@@ -108,6 +108,12 @@ public class EntityHandler<T> {
     public List<T> readAsList() {
         List<T> list = Collections.unmodifiableList(this.entitySheetHandler.read());
         return list;
+    }
+
+    private static class SheetNotFoundException extends Exception {
+        public SheetNotFoundException(String message) {
+            super(String.format("Could not find sheet %s", message));
+        }
     }
 
     /**
@@ -126,7 +132,7 @@ public class EntityHandler<T> {
             StylesTable stylesTable = xssfReader.getStylesTable();
             InputStream sheetInputStream = null;
             XSSFReader.SheetIterator sheets = (XSSFReader.SheetIterator) xssfReader.getSheetsData();
-            while(sheets.hasNext()) {
+            while (sheets.hasNext()) {
                 sheetInputStream = sheets.next();
                 if (sheets.getSheetName().equalsIgnoreCase(sheetName)) {
                     break;
@@ -136,11 +142,11 @@ public class EntityHandler<T> {
             }
 
             if (Objects.isNull(sheetInputStream)) {
-                throw new ZeroCellException(String.format("Could not find sheet %s", sheetName));
+                throw new SheetNotFoundException(sheetName);
             }
 
             XMLReader xmlReader = SAXHelper.newXMLReader();
-            xmlReader.setContentHandler(new XSSFSheetXMLHandler(stylesTable,strings, entitySheetHandler, dataFormatter, false));
+            xmlReader.setContentHandler(new XSSFSheetXMLHandler(stylesTable, strings, entitySheetHandler, dataFormatter, false));
             xmlReader.parse(new InputSource(sheetInputStream));
             sheetInputStream.close();
             xmlReader = null;
@@ -148,6 +154,10 @@ public class EntityHandler<T> {
             stylesTable = null;
             strings = null;
             xssfReader = null;
+        } catch(SheetNotFoundException ex) {
+            throw new ZeroCellException(ex.getMessage());
+        } catch (ZeroCellException ze) {
+            throw ze; // Rethrow the Exception
         } catch (Exception e) {
             throw new ZeroCellException("Failed to process file", e);
         }
@@ -160,7 +170,6 @@ public class EntityHandler<T> {
         private final ColumnInfo[] columns;
         private final List<T> entities;
 
-        private boolean validateHeaders = true;
         private boolean isHeaderRow = false;
         private int currentRow = -1;
         private int currentCol = -1;
@@ -191,8 +200,9 @@ public class EntityHandler<T> {
             if (currentRow == 0) {
                 isHeaderRow = true;
                 return;
+            } else {
+                isHeaderRow = false;
             }
-            isHeaderRow = false;
             try {
                 cur = (T) type.newInstance();
                 // Write to the field with the @RowNumber annotation here if it exists
@@ -214,8 +224,6 @@ public class EntityHandler<T> {
 
         @Override
         public void cell(String cellReference, String formattedValue, XSSFComment xssfComment) {
-            if (Objects.isNull(cur)) return;
-
             // gracefully handle missing CellRef here in a similar way as XSSFCell does
             if(cellReference == null) {
                 cellReference = new CellAddress(currentRow, currentCol).formatAsString();
@@ -230,6 +238,13 @@ public class EntityHandler<T> {
 
             ColumnInfo currentColumnInfo = columns[column];
 
+            if (isHeaderRow) {
+                if (! currentColumnInfo.getName().equalsIgnoreCase(formattedValue)){
+                    throw new ZeroCellException(String.format("Expected Column '%s' but found '%s'", currentColumnInfo.getName(), formattedValue));
+                }
+            }
+            // Prevent from trying to write to a null instance
+            if (Objects.isNull(cur)) return;
             writeColumnField(cur, formattedValue, currentColumnInfo, currentRow);
         }
 
@@ -244,7 +259,6 @@ public class EntityHandler<T> {
          * @param rowNum the row number
          */
         private void writeColumnField(T object, String formattedValue, ColumnInfo currentColumnInfo, int rowNum) {
-            assertColumnName(currentColumnInfo.getName(), formattedValue);
             String fieldName = currentColumnInfo.getFieldName();
             try {
                 Converter converter = (Converter) currentColumnInfo.getConverterClass().newInstance();
@@ -341,14 +355,6 @@ public class EntityHandler<T> {
 
             }
             return value;
-        }
-
-        private void assertColumnName(String columnName, String value) {
-            if (validateHeaders && isHeaderRow) {
-                if (! columnName.equalsIgnoreCase(value)){
-                    throw new ZeroCellException(String.format("Expected Column '%s' but found '%s'", columnName, value));
-                }
-            }
         }
 
         private LocalDate parseAsLocalDate(String columnName, int rowNum, String value) {
