@@ -9,10 +9,12 @@ import org.junit.Assert;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.rules.TemporaryFolder;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
 import java.io.File;
+import java.io.IOException;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
@@ -23,6 +25,9 @@ import static org.junit.Assert.*;
  * Unit Tests for the reader class
  */
 public class TestReader {
+
+    @Rule
+    public TemporaryFolder temporaryFolder = new TemporaryFolder();
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
@@ -78,6 +83,17 @@ public class TestReader {
         thrown.expectMessage("Expected Column 'DOB' but found 'DATE_OF_BIRTH'");
         Reader.of(Person2.class)
                 .from(new File("src/test/resources/test_people.xlsx"))
+                .sheet("uploads")
+                .list();
+    }
+
+    @Test
+    public void testShouldThrowForNonOpenXMLFile() throws IOException {
+        File file = temporaryFolder.newFile();
+        thrown.expect(ZeroCellException.class);
+        thrown.expectMessage("Cannot load file. The file must be an Excel 2007+ Workbook (.xlsx)");
+        Reader.of(Person.class)
+                .from(file)
                 .sheet("uploads")
                 .list();
     }

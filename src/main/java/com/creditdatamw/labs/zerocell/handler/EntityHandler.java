@@ -7,6 +7,7 @@ import com.creditdatamw.labs.zerocell.column.ColumnInfo;
 import com.creditdatamw.labs.zerocell.converter.Converter;
 import com.creditdatamw.labs.zerocell.converter.NoopConverter;
 import org.apache.poi.hssf.util.CellReference;
+import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.ss.util.CellAddress;
@@ -154,6 +155,8 @@ public class EntityHandler<T> {
             stylesTable = null;
             strings = null;
             xssfReader = null;
+        } catch(org.apache.poi.openxml4j.exceptions.InvalidFormatException | NotOfficeXmlFileException ife) {
+            throw new ZeroCellException("Cannot load file. The file must be an Excel 2007+ Workbook (.xlsx)");
         } catch(SheetNotFoundException ex) {
             throw new ZeroCellException(ex.getMessage());
         } catch (ZeroCellException ze) {
@@ -232,8 +235,11 @@ public class EntityHandler<T> {
             int column = new CellReference(cellReference).getCol();
             currentCol = column;
 
+            // We ignore additional cells here since we only care about the cells
+            // in the columns array i.e. the defined columns
             if (column > columns.length) {
-                throw new ZeroCellException("Invalid Column index found: " + column);
+                LOGGER.warn("Invalid Column index found: " + column);
+                return;
             }
 
             ColumnInfo currentColumnInfo = columns[column];
