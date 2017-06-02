@@ -172,6 +172,7 @@ public class EntityHandler<T> {
         private final ColumnInfo rowNumberColumn;
         private final ColumnInfo[] columns;
         private final List<T> entities;
+        private final int MAXIMUM_COL_INDEX;
 
         private boolean isHeaderRow = false;
         private int currentRow = -1;
@@ -182,6 +183,7 @@ public class EntityHandler<T> {
             this.rowNumberColumn = rowNumberColumn;
             this.columns = columns;
             this.entities = new ArrayList<>();
+            this.MAXIMUM_COL_INDEX = columns.length - 1;
         }
 
         List<T> read() {
@@ -237,7 +239,7 @@ public class EntityHandler<T> {
 
             // We ignore additional cells here since we only care about the cells
             // in the columns array i.e. the defined columns
-            if (column > columns.length) {
+            if (column > MAXIMUM_COL_INDEX) {
                 LOGGER.warn("Invalid Column index found: " + column);
                 return;
             }
