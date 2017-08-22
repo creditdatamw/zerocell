@@ -59,7 +59,7 @@ public class CellMethodSpec {
                                               String beanSetterProperty) {
         String columnName = column.getName();
         String converterClass = String.format("%s", column.getConverterClass());
-        String msg = "new ZeroCellException(\"$L threw an exception while trying to convert value \" + formattedValue, e)";
+        String throwException = "throw new ZeroCellException(\"$L threw an exception while trying to convert value \" + formattedValue, e)";
 
         CodeBlock converterCodeBlock = CodeBlock.builder()
                 .addStatement("//Handle any exceptions thrown by the converter - this stops execution of the whole process")
@@ -69,7 +69,7 @@ public class CellMethodSpec {
                             converterClass,
                             columnName)
                 .nextControlFlow("catch(Exception e)")
-                    .addStatement(msg, converterClass)
+                    .addStatement(throwException, converterClass)
                 .endControlFlow()
                 .build();
         // Don't use a converter if there isn't a custom one
