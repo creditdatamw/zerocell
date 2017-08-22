@@ -1,5 +1,6 @@
 package com.creditdatamw.zerocell.processor.spec;
 
+import com.creditdatamw.zerocell.converter.NoopConverter;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import org.apache.poi.xssf.usermodel.XSSFComment;
@@ -21,7 +22,6 @@ public class CellMethodSpec {
         System.out.println("Column size" + columns.size());
         columns.forEach(column -> {
             String staticFieldName = "COL_" + column.getName();
-            String columnName = column.getName();
             String fieldName = column.getFieldName();
             // TODO(zikani): Find a better way ??
             // Here we're assuming people follow standards of naming POJO fields
@@ -30,10 +30,11 @@ public class CellMethodSpec {
                     .concat(fieldName.substring(1));
 
             builder.beginControlFlow("if ($L == column)", staticFieldName)
-                .addStatement("assertColumnName($S, formattedValue)", columnName)
-                .addStatement(converterStatementFor(column), beanSetterProperty, columnName)
-                .addStatement("return")
-                .endControlFlow();
+                .addStatement("assertColumnName($S, formattedValue)", column.getName());
+
+            converterStatementFor(builder, column, beanSetterProperty);
+
+            builder.addStatement("return").endControlFlow();
         });
 
         return  MethodSpec.methodBuilder("cell")
@@ -51,6 +52,32 @@ public class CellMethodSpec {
                 .addStatement("currentCol = column")
                 .addCode(builder.build())
                 .build();
+    }
+
+    private static void converterStatementFor(CodeBlock.Builder builder,
+                                              ColumnInfoType column,
+                                              String beanSetterProperty) {
+        String columnName = column.getName();
+        String converterClass = String.format("%s", column.getConverterClass());
+        String msg = "new ZeroCellException(\"$L threw an exception while trying to convert value \" + formattedValue, e)";
+
+        CodeBlock converterCodeBlock = CodeBlock.builder()
+                .addStatement("//Handle any exceptions thrown by the converter - this stops execution of the whole process")
+                .beginControlFlow("try")
+                    .addStatement("cur.set$L(new $L().convert(formattedValue, $S, currentRow))",
+                            beanSetterProperty,
+                            converterClass,
+                            columnName)
+                .nextControlFlow("catch(Exception e)")
+                    .addStatement(msg, converterClass)
+                .endControlFlow()
+                .build();
+        // Don't use a converter if there isn't a custom one
+        if (converterClass.equals(NoopConverter.class.getTypeName())) {
+            builder.addStatement(converterStatementFor(column), beanSetterProperty, columnName);
+        } else {
+            builder.add(converterCodeBlock);
+        }
     }
 
     public static String converterStatementFor(ColumnInfoType column) {

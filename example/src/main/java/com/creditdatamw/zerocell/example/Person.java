@@ -20,7 +20,7 @@ public class Person {
     @RowNumber
     private int rowNumber;
 
-    @Column(name= "ID", index=0)
+    @Column(name= "ID", index=0, convertorClass = IdPrefixingConverter.class)
     private String id;
 
     @NotEmpty
