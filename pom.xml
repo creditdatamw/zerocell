@@ -6,7 +6,7 @@
 	
 	<groupId>com.creditdatamw.labs</groupId>
     <artifactId>zerocell-parent</artifactId>
-    <version>0.2.1-SNAPSHOT</version>
+    <version>0.2.1</version>
     <packaging>pom</packaging>
 
     <modules>
