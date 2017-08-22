@@ -1,0 +1,93 @@
+package com.creditdatamw.zerocell.processor.spec;
+
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.MethodSpec;
+import org.apache.poi.xssf.usermodel.XSSFComment;
+
+import javax.lang.model.element.Modifier;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+
+/**
+ * Generates a method that uses a specified convertor
+ * for a field in a ZerocellReaderBuilder.
+ */
+public class CellMethodSpec {
+
+    public static MethodSpec build(List<ColumnInfoType> columns) {
+        final CodeBlock.Builder builder = CodeBlock.builder();
+        System.out.println("Column size" + columns.size());
+        columns.forEach(column -> {
+            String staticFieldName = "COL_" + column.getName();
+            String columnName = column.getName();
+            String fieldName = column.getFieldName();
+            // TODO(zikani): Find a better way ??
+            // Here we're assuming people follow standards of naming POJO fields
+            String beanSetterProperty = String.valueOf(fieldName.charAt(0))
+                    .toUpperCase()
+                    .concat(fieldName.substring(1));
+
+            builder.beginControlFlow("if ($L == column)", staticFieldName)
+                .addStatement("assertColumnName($S, formattedValue)", columnName)
+                .addStatement(converterStatementFor(column), beanSetterProperty, columnName)
+                .addStatement("return")
+                .endControlFlow();
+        });
+
+        return  MethodSpec.methodBuilder("cell")
+                .addAnnotation(Override.class)
+                .addModifiers(Modifier.PUBLIC)
+                .addParameter(String.class, "cellReference")
+                .addParameter(String.class, "formattedValue", Modifier.FINAL)
+                .addParameter(XSSFComment.class, "xssfComment", Modifier.FINAL)
+                .addStatement("if (java.util.Objects.isNull(cur)) return")
+                .addComment("Gracefully handle missing CellRef here in a similar way as XSSFCell does")
+                .beginControlFlow("if(cellReference == null)")
+                .addStatement("cellReference = new $T(currentRow, currentCol).formatAsString()", org.apache.poi.ss.util.CellAddress.class)
+                .endControlFlow()
+                .addStatement("int column = new $T(cellReference).getCol()", org.apache.poi.hssf.util.CellReference.class)
+                .addStatement("currentCol = column")
+                .addCode(builder.build())
+                .build();
+    }
+
+    public static String converterStatementFor(ColumnInfoType column) {
+        String fieldType = String.format("%s", column.getType());
+
+        if (fieldType.equals(LocalDateTime.class.getTypeName())) {
+            return "cur.set$L(toLocalDateTime.convert(formattedValue, $S, currentRow))";
+
+        } else if (fieldType.equals(LocalDate.class.getTypeName())) {
+            return "cur.set$L(toLocalDate.convert(formattedValue, $S, currentRow))";
+
+        } else if (fieldType.equals(java.sql.Date.class.getTypeName())) {
+            return "cur.set$L(toSqlDate.convert(formattedValue, $S, currentRow))";
+
+        } else if (fieldType.equals(Timestamp.class.getTypeName())) {
+            return "cur.set$L(toSqlTimestamp.convert(formattedValue, $S, currentRow))";
+
+        } else if (fieldType.equals(Integer.class.getTypeName()) ||
+                fieldType.equals(int.class.getTypeName())) {
+            return "cur.set$L(toInteger.convert(formattedValue, $S, currentRow))";
+
+        } else if (fieldType.equals(Long.class.getTypeName()) ||
+                fieldType.equals(long.class.getTypeName())) {
+            return "cur.set$L(toLong.convert(formattedValue, $S, currentRow))";
+
+        } else if (fieldType.equals(Double.class.getTypeName()) ||
+                fieldType.equals(double.class.getTypeName())) {
+            return "cur.set$L(toDouble.convert(formattedValue, $S, currentRow))";
+
+        } else if (fieldType.equals(Float.class.getTypeName()) ||
+                fieldType.equals(float.class.getTypeName())) {
+            return "cur.set$L(toFloat.convert(formattedValue, $S, currentRow))";
+
+        } else if (fieldType.equals(Boolean.class.getTypeName())) {
+            return "cur.set$L(toBoolean.convert(formattedValue, $S, currentRow))";
+        }
+        // Default to Converters.noop.convert
+        return "cur.set$L(noop.convert(formattedValue, $S, currentRow))";
+    }
+}

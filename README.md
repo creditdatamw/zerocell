@@ -16,7 +16,7 @@ POJO (Plain Old Java Objects).
 
 * Read or process excel workbook styles and other visual effects
 * Writing to excel files
-
+* Loading data into complex object hierarchies.
 
 ## Why not handle writing?
 
@@ -29,9 +29,9 @@ Add the following to your `pom.xml`
 
 ```xml
 <dependency>
-    <groupId>com.creditdatamw.labs</groupId>
-    <artifactId>zerocell</artifactId>
-    <version>0.1.4</version>
+    <groupId>com.creditdatamw.zerocell</groupId>
+    <artifactId>zerocell-core</artifactId>
+    <version>0.2.0</version>
 </dependency>
 ```
 
@@ -64,21 +64,29 @@ List<Person> people = Reader.of(Person.class)
                             .list();
 ```
 
+You can also inspect the column names of the class using the static `columnsOf` method:
+
+```java
+String[] columns = Reader.columnsOf(Person.class);
+```
+
 ## Gotchas
 
 ### Exceptions
 
-The API throws two kinds of exceptions - they are unchecked and may cause your code to stop executing if not 
-handled. These are `ZeroCellException` and `ValidationException`. Typically `ZeroCellException` will wrap
-another exception, so it's worth peeking at the `Exception#getCause` for those kind of exceptions.
+The API throws `ZeroCellException` if something goes wrong, e.g. sheet not found. 
+It is an unchecked exception and may cause your code to stop executing if not 
+handled. Typically `ZeroCellException` will wrap another exception, so it's worth 
+peeking at the cause using `Exception#getCause`.
 
 TODO
 ====
 
 * Add options for reading in batches and emitting
 * Add RowPostProcessor for determining what to ignore (like in xcelite)
-* Separate into zerocell-core (for runtime annotation processor) and zerocell-processor (for compile-time annotation processor)
 * Add RowBean interface to zerocell
+* Handle column name mismatches
+
 
 ## Authors
 
