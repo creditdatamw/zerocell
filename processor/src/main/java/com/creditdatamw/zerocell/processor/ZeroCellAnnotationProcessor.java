@@ -16,6 +16,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -68,7 +69,12 @@ public class ZeroCellAnnotationProcessor extends AbstractProcessor {
             }
             TypeElement classElement = (TypeElement) annotatedElement;
             try {
-                ReaderTypeSpec spec = new ReaderTypeSpec(classElement);
+                ZerocellReaderBuilder annotation = annotatedElement.getAnnotation(ZerocellReaderBuilder.class);
+                Optional<String> customReaderName =  Optional.empty();
+                if (! annotation.value().equalsIgnoreCase("__none__")) {
+                    customReaderName = Optional.of(annotation.value());
+                }
+                ReaderTypeSpec spec = new ReaderTypeSpec(classElement, customReaderName);
                 JavaFile javaFile = spec.build();
                 javaFile.writeTo(filer);
             } catch (Exception ioe) {

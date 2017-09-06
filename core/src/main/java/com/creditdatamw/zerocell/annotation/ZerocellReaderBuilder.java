@@ -16,5 +16,5 @@ public @interface ZerocellReaderBuilder {
      *
      * @return
      */
-    String name() default "";
+    String value() default "__none__";
 }

@@ -15,7 +15,7 @@ import java.time.LocalDate;
  * Person Class for tests
  */
 @Data
-@ZerocellReaderBuilder
+@ZerocellReaderBuilder("PersonExcelReader")
 public class Person {
     @RowNumber
     private int rowNumber;

@@ -9,23 +9,30 @@ import org.slf4j.LoggerFactory;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.regex.Pattern;
 
 import static com.creditdatamw.zerocell.processor.spec.ColumnInfoType.columnsOf;
 
 public class ReaderTypeSpec {
     private final TypeElement typeElement;
+    private final Optional<String> customReaderName;
 
-    public ReaderTypeSpec(TypeElement typeElement) {
+    public ReaderTypeSpec(TypeElement typeElement, Optional<String> customReaderName) {
         Objects.requireNonNull(typeElement);
         this.typeElement = typeElement;
+        this.customReaderName = customReaderName;
     }
 
     public JavaFile build() throws java.io.IOException {
-        final String readerClassName = String.format("%sReader", typeElement.getSimpleName());
+        final String readerClassName;
+
+        if (customReaderName.isPresent()) {
+            readerClassName = customReaderName.get();
+        } else {
+            readerClassName = String.format("%sReader", typeElement.getSimpleName());
+        }
+        assertReaderName();
         LoggerFactory.getLogger(ZeroCellAnnotationProcessor.class)
                 .info("Processing class: {}", typeElement);
         ClassName dataClass = ClassName.get(typeElement);
@@ -139,5 +146,11 @@ public class ReaderTypeSpec {
         LoggerFactory.getLogger(ZeroCellAnnotationProcessor.class)
                 .info("Generated reader class: {}", readerTypeSpec.name);
         return javaFile;
+    }
+
+    private void assertReaderName() {
+        if (! Pattern.matches("[A-Za-z]+\\d*[A-Za-z]", customReaderName.get())) {
+            throw new IllegalArgumentException("Invalid name for the reader Class: " + customReaderName.get());
+        }
     }
 }

@@ -16,7 +16,7 @@ public class ExampleApplication {
     public static void main(String... args) {
         File file = new File("src/main/resources/test_people.xlsx");
         String sheet = "uploads";
-        ZeroCellReader<Person> reader = new com.creditdatamw.zerocell.example.PersonReader();
+        ZeroCellReader<Person> reader = new com.creditdatamw.zerocell.example.PersonExcelReader();
         ReaderUtil.process(file, sheet, reader);
         List<Person> people = reader.read();
         for(Person p: people) {
