@@ -1,9 +1,11 @@
 package com.creditdatamw.zerocell.processor.spec;
 
 import com.creditdatamw.zerocell.converter.NoopConverter;
+import com.creditdatamw.zerocell.processor.ZeroCellAnnotationProcessor;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import org.apache.poi.xssf.usermodel.XSSFComment;
+import org.slf4j.LoggerFactory;
 
 import javax.lang.model.element.Modifier;
 import java.sql.Timestamp;
@@ -19,7 +21,8 @@ public class CellMethodSpec {
 
     public static MethodSpec build(List<ColumnInfoType> columns) {
         final CodeBlock.Builder builder = CodeBlock.builder();
-        System.out.println("Column size" + columns.size());
+        LoggerFactory.getLogger(ZeroCellAnnotationProcessor.class)
+                     .info("Found {} columns in source class", columns.size());
         columns.forEach(column -> {
             String staticFieldName = "COL_" + column.getName();
             String fieldName = column.getFieldName();

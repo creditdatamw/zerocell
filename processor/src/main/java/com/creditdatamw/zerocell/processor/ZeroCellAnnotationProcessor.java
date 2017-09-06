@@ -25,7 +25,6 @@ import java.util.Set;
  *
  * @author Zikani Nyirenda Mwase
  */
- // Some parts adapted from http://hannesdorfmann.com/annotation-processing/annotationprocessing101
 @AutoService(Processor.class)
 public class ZeroCellAnnotationProcessor extends AbstractProcessor {
     private Types typeUtils;

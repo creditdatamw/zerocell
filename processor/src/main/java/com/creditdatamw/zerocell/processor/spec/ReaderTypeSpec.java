@@ -2,6 +2,7 @@ package com.creditdatamw.zerocell.processor.spec;
 
 import com.creditdatamw.zerocell.ZeroCellException;
 import com.creditdatamw.zerocell.ZeroCellReader;
+import com.creditdatamw.zerocell.processor.ZeroCellAnnotationProcessor;
 import com.squareup.javapoet.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,8 @@ public class ReaderTypeSpec {
 
     public JavaFile build() throws java.io.IOException {
         final String readerClassName = String.format("%sReader", typeElement.getSimpleName());
-
+        LoggerFactory.getLogger(ZeroCellAnnotationProcessor.class)
+                .info("Processing class: {}", typeElement);
         ClassName dataClass = ClassName.get(typeElement);
         ClassName list = ClassName.get("java.util", "List");
         ClassName arrayList = ClassName.get("java.util", "ArrayList");
@@ -131,8 +133,11 @@ public class ReaderTypeSpec {
                 .addMethod(assertColumnName)
                 .build();
 
-        return JavaFile.builder(dataClass.packageName(), readerTypeSpec )
+        final JavaFile javaFile = JavaFile.builder(dataClass.packageName(), readerTypeSpec )
                 .addStaticImport(convertersClass, "*")
                 .build();
+        LoggerFactory.getLogger(ZeroCellAnnotationProcessor.class)
+                .info("Generated reader class: {}", readerTypeSpec.name);
+        return javaFile;
     }
 }
