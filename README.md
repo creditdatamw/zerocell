@@ -3,14 +3,16 @@ ZeroCell
 
 Existing Excel libraries do too much just to read data from a workbook.
 This library is optimized for *reading* data from excel only.
-Particularly, it is optimized for getting the data from Excel into
-POJO (Plain Old Java Objects). 
+Particularly, it is optimized for getting the data from an Excel Sheet
+into POJOs (Plain Old Java Objects) and has a very simple API. 
 
 ## Goals 
 
-* Get POJOs from Excel with lower overheads i.e. read excel files with as few resources as possible
+* Get POJOs from Excel with lower overheads i.e. read excel files with 
+as few resources as possible
 * Provide mappings for POJOs to excel rows via annotations
-* Generate excel readers via a compile-time annotation processor
+* Generate Excel readers via a compile-time annotation processor
+* Provide a simple low-ceremony API
 
 ## Non-Goals
 
@@ -29,13 +31,15 @@ Add the following to your `pom.xml`
 
 ```xml
 <dependency>
-    <groupId>com.creditdatamw.zerocell</groupId>
+    <groupId>com.creditdatamw.labs</groupId>
     <artifactId>zerocell-core</artifactId>
-    <version>0.2.0</version>
+    <version>0.2.2</version>
 </dependency>
 ```
 
-ZeroCell has a very simple API. You can create a class to represent a row in an Excel sheet.
+## Example 
+
+You create a class to represent a row in an Excel sheet.
 For example:
 
 ```java
@@ -52,41 +56,93 @@ public class Person {
     
     @Column(index=2, name="DATE_OF_BIRTH")
     private LocalDate dateOfBirth;
-}
-```
-
-Then using the `Reader` class you can load a list from the excel file as follows:
-
-```java
-List<Person> people = Reader.of(Person.class)
+    
+    public static void main(String... args) {
+        // Then using the `Reader` class you can load 
+        // a list from the excel file as follows:
+        List<Person> people = Reader.of(Person.class)
                             .from(new File("people.xlsx"))
                             .sheet("Sheet 1")
                             .list();
+        
+        // You can also inspect the column names of 
+        // the class using the static `columnsOf` method:
+        String[] columns = Reader.columnsOf(Person.class);    
+    }
+}
 ```
 
-You can also inspect the column names of the class using the static `columnsOf` method:
+### Using the Annotation Processor
+
+ZeroCell provides an annotation processor to generate Reader 
+classes to read records from Excel without Runtime reflection 
+which makes the code amenable to better auditing and customization.
+
+In order to use the functionality you will first need to add 
+the dependency to your POM. This adds a compile-time 
+annotation processor which generates the implementation classes. 
+
+```xml
+<dependency>
+    <groupId>com.creditdatamw.labs</groupId>
+    <artifactId>zerocell-processor</artifactId>
+    <version>0.2.2</version>
+    <scope>provided</scope>
+</dependency>
+```
+
+
+Then, in your code use the `@ZeroCellReaderBuilder` annotation on a class
+that contains ZeroCell `@Column` annotations.
+
+Using a class defined as in the example shown below:
 
 ```java
-String[] columns = Reader.columnsOf(Person.class);
+package com.example;
+
+@ZerocellReaderBuilder
+public class Person {
+    @RowNumber
+    private int rowNumber;
+    
+    @Column(index=0, name="FIRST_NAME")
+    private String firstName;
+    
+    @Column(index=1, name="LAST_NAME")
+    private String lastName;
+    
+    @Column(index=2, name="DATE_OF_BIRTH")
+    private LocalDate dateOfBirth;
+    
+    public static void main(String... args) {
+        File file = new File("people.xlsx");
+        String sheet = "Sheet 1";
+        ZeroCellReader<Person> reader = new com.example.PersonReader();
+        ReaderUtil.process(file, sheet, reader);
+        List<Person> people = reader.read();
+        people.forEach(person -> {
+            // do something with person
+        });
+    }
+}
 ```
 
-## Gotchas
+Generates a class in the com.example package
 
-### Exceptions
+```java
+package com.example;
+
+public class PersonReader implements ZeroCellReader {
+  // generated code here
+}
+```
+
+## Exception Handling
 
 The API throws `ZeroCellException` if something goes wrong, e.g. sheet not found. 
 It is an unchecked exception and may cause your code to stop executing if not 
 handled. Typically `ZeroCellException` will wrap another exception, so it's worth 
 peeking at the cause using `Exception#getCause`.
-
-TODO
-====
-
-* Add options for reading in batches and emitting
-* Add RowPostProcessor for determining what to ignore (like in xcelite)
-* Add RowBean interface to zerocell
-* Handle column name mismatches
-
 
 ## Authors
 
