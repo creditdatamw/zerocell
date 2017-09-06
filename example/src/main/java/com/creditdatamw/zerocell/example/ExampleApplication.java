@@ -14,11 +14,11 @@ public class ExampleApplication {
      * PersonExample Class for tests
      */
     public static void main(String... args) {
-        File file = new File("src/main/resources/test_people.xlsx");
+        File file = new File("../core/src/test/resources/test_people.xlsx");
         String sheet = "uploads";
         ZeroCellReader<Person> reader = new com.creditdatamw.zerocell.example.PersonExcelReader();
-        ReaderUtil.process(file, sheet, reader);
-        List<Person> people = reader.read();
+        List<Person> people = reader.read(file, sheet);
+        System.out.println("People from the file:");
         for(Person p: people) {
             System.out.println(String.format("row:%s data: %s", p.getRowNumber(), p.toString()));
         }

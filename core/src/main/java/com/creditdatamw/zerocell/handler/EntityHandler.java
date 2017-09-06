@@ -96,7 +96,7 @@ public class EntityHandler<T> {
      * @return an immutable list of the extracted entities
      */
     public List<T> readAsList() {
-        List<T> list = Collections.unmodifiableList(this.entitySheetHandler.read());
+        List<T> list = Collections.unmodifiableList(this.entitySheetHandler.read(null, sheetName));
         return list;
     }
 
@@ -125,7 +125,10 @@ public class EntityHandler<T> {
         }
 
         @Override
-        public List<T> read() {
+        public List<T> read(File file, String sheet) {
+            /** We don't need to process the file here since that's
+             * handled in {@link ReaderUtil} which MUST be used when using this class
+             */
             return Collections.unmodifiableList(this.entities);
         }
 

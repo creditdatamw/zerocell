@@ -28,7 +28,6 @@ public final class ReaderUtil {
      * @return list of the eextracted entities
      */
     public static void process(File file, String sheetName, ZeroCellReader reader) {
-        XSSFSheetXMLHandler.SheetContentsHandler sheetContentsHandler = reader;
         try (FileInputStream fis = new FileInputStream(file);
              OPCPackage opcPackage = OPCPackage.open(fis)) {
 
@@ -52,7 +51,7 @@ public final class ReaderUtil {
             }
 
             XMLReader xmlReader = SAXHelper.newXMLReader();
-            xmlReader.setContentHandler(new XSSFSheetXMLHandler(stylesTable, strings, sheetContentsHandler, dataFormatter, false));
+            xmlReader.setContentHandler(new XSSFSheetXMLHandler(stylesTable, strings, reader, dataFormatter, false));
             xmlReader.parse(new InputSource(sheetInputStream));
             sheetInputStream.close();
             xmlReader = null;

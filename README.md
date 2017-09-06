@@ -33,7 +33,7 @@ Add the following to your `pom.xml`
 <dependency>
     <groupId>com.creditdatamw.labs</groupId>
     <artifactId>zerocell-core</artifactId>
-    <version>0.2.2</version>
+    <version>0.2.3</version>
 </dependency>
 ```
 
@@ -86,13 +86,13 @@ annotation processor which generates the implementation classes.
 <dependency>
     <groupId>com.creditdatamw.labs</groupId>
     <artifactId>zerocell-processor</artifactId>
-    <version>0.2.2</version>
+    <version>0.2.3</version>
     <scope>provided</scope>
 </dependency>
 ```
 
 
-Then, in your code use the `@ZeroCellReaderBuilder` annotation on a class
+Then, in your code use the `@ZerocellReaderBuilder` annotation on a class
 that contains ZeroCell `@Column` annotations.
 
 Using a class defined as in the example shown below:
@@ -118,8 +118,7 @@ public class Person {
         File file = new File("people.xlsx");
         String sheet = "Sheet 1";
         ZeroCellReader<Person> reader = new com.example.PersonReader();
-        ReaderUtil.process(file, sheet, reader);
-        List<Person> people = reader.read();
+        List<Person> people = reader.read(file, sheet);
         people.forEach(person -> {
             // do something with person
         });

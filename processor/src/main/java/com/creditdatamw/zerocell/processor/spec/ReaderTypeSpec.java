@@ -37,17 +37,32 @@ public class ReaderTypeSpec {
                 .info("Processing class: {}", typeElement);
         ClassName dataClass = ClassName.get(typeElement);
         ClassName list = ClassName.get("java.util", "List");
+        ClassName readerUtil = ClassName.get("com.creditdatamw.zerocell", "ReaderUtil");
         ClassName arrayList = ClassName.get("java.util", "ArrayList");
         ClassName convertersClass = ClassName.get("com.creditdatamw.zerocell.converter", "Converters");
 
         TypeName listOfData = ParameterizedTypeName.get(list, dataClass);
         TypeName zeroCellReader = ParameterizedTypeName.get(ClassName.get(ZeroCellReader.class), dataClass);
 
+        MethodSpec reset = MethodSpec.methodBuilder("reset")
+                .addModifiers(Modifier.PRIVATE)
+                .addStatement("this.currentRow = -1")
+                .addStatement("this.currentCol = -1")
+                .addStatement("this.cur = null")
+                .addStatement("this.data.clear()")
+                .build();
+
         MethodSpec read = MethodSpec.methodBuilder("read")
                 .addModifiers(Modifier.PUBLIC)
                 .addAnnotation(Override.class)
+                .addParameter(java.io.File.class, "file", Modifier.FINAL)
+                .addParameter(String.class, "sheet", Modifier.FINAL)
                 .returns(listOfData)
-                .addStatement("return $T.unmodifiableList(this.data)", Collections.class)
+                .addStatement("this.reset()")
+                .addStatement("$T.process(file, sheet, this)", readerUtil)
+                .addStatement("List<$T> dataList", typeElement)
+                .addStatement("dataList = $T.unmodifiableList(this.data)", Collections.class)
+                .addStatement("return dataList")
                 .build();
 
         MethodSpec startRow = MethodSpec.methodBuilder("startRow")
@@ -132,6 +147,7 @@ public class ReaderTypeSpec {
                 .addField(FieldSpec.builder(dataClass, "cur", Modifier.PRIVATE).build())
                 .addField(FieldSpec.builder(listOfData, "data", Modifier.PRIVATE).build())
                 .addMethod(read)
+                .addMethod(reset)
                 .addMethod(constructor)
                 .addMethod(headerFooter)
                 .addMethod(startRow)
