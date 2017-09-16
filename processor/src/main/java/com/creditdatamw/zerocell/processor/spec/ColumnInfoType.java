@@ -1,5 +1,6 @@
 package com.creditdatamw.zerocell.processor.spec;
 
+import com.creditdatamw.zerocell.ZeroCellException;
 import com.creditdatamw.zerocell.annotation.Column;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,7 +9,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeMirror;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -65,6 +65,26 @@ class ColumnInfoType {
                         converterClazz));
             }
         }
+        // Check for out of range and duplicate column indexes
+        boolean[] indexUsed = new boolean[columns.size()];
+        int index;
+        for(ColumnInfoType c: columns) {
+            index = c.getIndex();
+            if (index > indexUsed.length - 1) {
+                throw new ZeroCellException(
+                    String.format(
+                        "Column index out of range. index=%s columnCount=%s." +
+                        "Ensure there @Column annotations for all indexes from 0 to %s",
+                        index,
+                        indexUsed.length,
+                        indexUsed.length - 1));
+            }
+            if (indexUsed[index]) {
+                throw new ZeroCellException("Cannot map two columns to the same index: " + index);
+            }
+            indexUsed[index] = true;
+        }
+        indexUsed = null;
         return columns;
     }
 }
