@@ -16,22 +16,16 @@ import static com.creditdatamw.zerocell.processor.spec.ColumnInfoType.columnsOf;
 
 public class ReaderTypeSpec {
     private final TypeElement typeElement;
-    private final Optional<String> customReaderName;
+    private final String readerClassName;
 
     public ReaderTypeSpec(TypeElement typeElement, Optional<String> customReaderName) {
         Objects.requireNonNull(typeElement);
         this.typeElement = typeElement;
-        this.customReaderName = customReaderName;
+        this.readerClassName = customReaderName.orElse(
+                String.format("%sReader", typeElement.getSimpleName()));
     }
 
     public JavaFile build() throws java.io.IOException {
-        final String readerClassName;
-
-        if (customReaderName.isPresent()) {
-            readerClassName = customReaderName.get();
-        } else {
-            readerClassName = String.format("%sReader", typeElement.getSimpleName());
-        }
         assertReaderName();
         LoggerFactory.getLogger(ZeroCellAnnotationProcessor.class)
                 .info("Processing class: {}", typeElement);
@@ -165,8 +159,8 @@ public class ReaderTypeSpec {
     }
 
     private void assertReaderName() {
-        if (! Pattern.matches("[A-Za-z]+\\d*[A-Za-z]", customReaderName.get())) {
-            throw new IllegalArgumentException("Invalid name for the reader Class: " + customReaderName.get());
+        if (! Pattern.matches("[A-Za-z]+\\d*[A-Za-z]", readerClassName)) {
+            throw new IllegalArgumentException("Invalid name for the reader Class: " + readerClassName);
         }
     }
 }
