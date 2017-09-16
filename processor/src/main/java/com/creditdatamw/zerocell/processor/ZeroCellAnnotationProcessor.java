@@ -71,8 +71,9 @@ public class ZeroCellAnnotationProcessor extends AbstractProcessor {
             try {
                 ZerocellReaderBuilder annotation = annotatedElement.getAnnotation(ZerocellReaderBuilder.class);
                 Optional<String> customReaderName =  Optional.empty();
-                if (! annotation.value().equalsIgnoreCase("__none__")) {
-                    customReaderName = Optional.of(annotation.value());
+                String name = annotation.value();
+                if (!name.equals("__none__") && !name.isEmpty()) {
+                    customReaderName = Optional.of(name);
                 }
                 ReaderTypeSpec spec = new ReaderTypeSpec(classElement, customReaderName);
                 JavaFile javaFile = spec.build();
