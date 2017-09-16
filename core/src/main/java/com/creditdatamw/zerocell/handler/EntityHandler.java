@@ -82,6 +82,11 @@ public class EntityHandler<T> {
         int index = 0;
         for(ColumnInfo columnInfo: list) {
             index = columnInfo.getIndex();
+            if (index > columns.length - 1) {
+                throw new ZeroCellException(
+                        "Column index out of range. index=" + index + " columnCount=" + columns.length
+                        + ". Ensure there @Column annotations for all indexes from 0 to " + (columns.length - 1));
+            }
             if (! Objects.isNull(columns[index])) {
                 throw new ZeroCellException("Cannot map two columns to the same index: " + index);
             }
