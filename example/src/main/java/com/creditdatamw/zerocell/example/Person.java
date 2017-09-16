@@ -18,7 +18,7 @@ import java.time.LocalDate;
 @ZerocellReaderBuilder("PersonExcelReader")
 public class Person {
     @RowNumber
-    private int rowNumber;
+    private int row;
 
     @Column(name= "ID", index=0, convertorClass = IdPrefixingConverter.class)
     private String id;

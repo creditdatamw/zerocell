@@ -26,11 +26,8 @@ public class CellMethodSpec {
         columns.forEach(column -> {
             String staticFieldName = "COL_" + column.getName();
             String fieldName = column.getFieldName();
-            // TODO(zikani): Find a better way ??
-            // Here we're assuming people follow standards of naming POJO fields
-            String beanSetterProperty = String.valueOf(fieldName.charAt(0))
-                    .toUpperCase()
-                    .concat(fieldName.substring(1));
+
+            String beanSetterProperty = beanSetterPropertyName(fieldName);
 
             builder.beginControlFlow("if ($L == column)", staticFieldName)
                 .addStatement("assertColumnName($S, formattedValue)", column.getName());
@@ -119,5 +116,22 @@ public class CellMethodSpec {
         }
         // Default to Converters.noop.convert
         return "cur.set$L(noop.convert(formattedValue, $S, currentRow))";
+    }
+
+    /**
+     * Returns the field name for a "setter" for a POJO, i.e. the part after the "set" text.
+     * <br/>
+     * Example: <code>"set" + beanSetterPropertyName("name")  -> "setName"</code>
+     *
+     * @param fieldName
+     * @return
+     */
+    static String beanSetterPropertyName(String fieldName) {
+        // TODO(zikani): Find a better way ??
+        // Here we're assuming people follow standards of naming POJO fields
+        String beanSetterProperty = String.valueOf(fieldName.charAt(0))
+                .toUpperCase()
+                .concat(fieldName.substring(1));
+        return beanSetterProperty;
     }
 }

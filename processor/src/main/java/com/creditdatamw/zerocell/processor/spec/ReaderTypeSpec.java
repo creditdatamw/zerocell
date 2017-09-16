@@ -2,16 +2,21 @@ package com.creditdatamw.zerocell.processor.spec;
 
 import com.creditdatamw.zerocell.ZeroCellException;
 import com.creditdatamw.zerocell.ZeroCellReader;
+import com.creditdatamw.zerocell.annotation.RowNumber;
 import com.creditdatamw.zerocell.processor.ZeroCellAnnotationProcessor;
 import com.squareup.javapoet.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.MirroredTypeException;
+import javax.lang.model.type.TypeMirror;
 import java.util.*;
 import java.util.regex.Pattern;
 
+import static com.creditdatamw.zerocell.processor.spec.CellMethodSpec.beanSetterPropertyName;
 import static com.creditdatamw.zerocell.processor.spec.ColumnInfoType.columnsOf;
 
 public class ReaderTypeSpec {
@@ -59,7 +64,7 @@ public class ReaderTypeSpec {
                 .addStatement("return dataList")
                 .build();
 
-        MethodSpec startRow = MethodSpec.methodBuilder("startRow")
+        MethodSpec.Builder startRowBuilder = MethodSpec.methodBuilder("startRow")
                 .addAnnotation(Override.class)
                 .addModifiers(Modifier.PUBLIC)
                 .addParameter(Integer.TYPE, "i", Modifier.FINAL)
@@ -70,9 +75,14 @@ public class ReaderTypeSpec {
                 .addStatement("isHeaderRow=true")
                 .addStatement("return")
                 .endControlFlow()
-                .addStatement("cur = new $T()", dataClass)
-                .addStatement("cur.setRowNumber(currentRow)")
-                .build();
+                .addStatement("cur = new $T()", dataClass);
+
+        checkRowNumberField().ifPresent(fieldName -> {
+            //we'll get something like startRowBuilder.addStatement("cur.setRowNumber(currentRow)");
+            startRowBuilder.addStatement("cur.set$L(currentRow)", fieldName);
+        });
+
+        MethodSpec startRow = startRowBuilder.build();
 
         MethodSpec endRow = MethodSpec.methodBuilder("endRow")
                 .addAnnotation(Override.class)
@@ -162,5 +172,36 @@ public class ReaderTypeSpec {
         if (! Pattern.matches("[A-Za-z]+\\d*[A-Za-z]", readerClassName)) {
             throw new IllegalArgumentException("Invalid name for the reader Class: " + readerClassName);
         }
+    }
+
+    private Optional<String> checkRowNumberField() {
+        for(Element element: typeElement.getEnclosedElements()) {
+            if (! element.getKind().isField()) {
+                continue;
+            }
+            RowNumber annotation = element.getAnnotation(RowNumber.class);
+            if (! Objects.isNull(annotation)) {
+                TypeMirror type;
+                try {
+                    type = element.asType();
+                } catch (MirroredTypeException mte) {
+                    type = mte.getTypeMirror();
+                }
+                final String fieldType = String.format("%s", type);
+                final String fieldName = element.getSimpleName().toString();
+                if (fieldType.equals(int.class.getTypeName())     ||
+                    fieldType.equals(long.class.getTypeName())    ||
+                    fieldType.equals(Integer.class.getTypeName()) ||
+                    fieldType.equals(Long.class.getTypeName())
+                ) {
+                    return Optional.of(beanSetterPropertyName(fieldName));
+                } else {
+                    // Must be one of the integer classes or bust!
+                    throw new IllegalArgumentException(
+                            String.format("Invalid type (%s) for @RowNumber field (%s). Only java.lang.Integer and java.lang.Long are allowed", fieldType, fieldName));
+                }
+            }
+        }
+        return Optional.empty();
     }
 }

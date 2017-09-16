@@ -20,7 +20,7 @@ public class ExampleApplication {
         List<Person> people = reader.read(file, sheet);
         System.out.println("People from the file:");
         for(Person p: people) {
-            System.out.println(String.format("row:%s data: %s", p.getRowNumber(), p.toString()));
+            System.out.println(String.format("row:%s data: %s", p.getRow(), p.toString()));
         }
     }
 }
