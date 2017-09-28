@@ -47,7 +47,7 @@ public class ColumnInfo {
         LoggerFactory.getLogger(ColumnInfo.class).debug(String.format("Found %s columns in class %s", columnNames.length, clazz.getName()));
 
         for(Column annotation: columns) {
-            columnNames[annotation.index()] = annotation.name();
+            columnNames[annotation.index()] = annotation.name().trim();
         }
         columns = null;
         return columnNames;

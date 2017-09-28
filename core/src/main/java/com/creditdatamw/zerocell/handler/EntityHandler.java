@@ -65,7 +65,7 @@ public class EntityHandler<T> {
             Column annotation = field.getAnnotation(Column.class);
             if (! Objects.isNull(annotation)) {
                 Class<?> converter = annotation.convertorClass();
-                list.add(new ColumnInfo(annotation.name(),
+                list.add(new ColumnInfo(annotation.name().trim(),
                                        field.getName(),
                                        annotation.index(),
                                        annotation.dataFormat(),
@@ -194,7 +194,7 @@ public class EntityHandler<T> {
             ColumnInfo currentColumnInfo = columns[column];
 
             if (isHeaderRow) {
-                if (! currentColumnInfo.getName().equalsIgnoreCase(formattedValue)){
+                if (! currentColumnInfo.getName().equalsIgnoreCase(formattedValue.trim())){
                     throw new ZeroCellException(String.format("Expected Column '%s' but found '%s'", currentColumnInfo.getName(), formattedValue));
                 }
             }
