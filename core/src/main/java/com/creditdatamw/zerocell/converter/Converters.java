@@ -69,7 +69,7 @@ public class Converters {
             return Integer.valueOf(formattedValue == null ? "0.0" : formattedValue);
         } catch (Exception e) {
             LOGGER.error("Failed to parse {} as integer. Using default of -1 at column={} row={} ", formattedValue, columnName, rowNum);
-            return new Integer(-1);
+            return Integer.valueOf(-1);
         }
     });
 
@@ -79,7 +79,7 @@ public class Converters {
             return Long.valueOf(formattedValue == null ? "0" : formattedValue);
         } catch (Exception e) {
             // LOGGER.error("Failed to parse {} as long. Using default of -1 at column={} row={} ", formattedValue, columnName, rowNum);
-            return new Long(-1);
+            return Long.valueOf(-1);
         }
     });
 
@@ -89,7 +89,7 @@ public class Converters {
             return Double.valueOf(formattedValue == null ? "0.0" : formattedValue);
         } catch (Exception e) {
             // LOGGER.error("Failed to parse {} as double. Using default of -1 at column={} row={} ", formattedValue, columnName, rowNum);
-            return new Double(-1.0);
+            return Double.valueOf(-1.0);
         }
     });
 

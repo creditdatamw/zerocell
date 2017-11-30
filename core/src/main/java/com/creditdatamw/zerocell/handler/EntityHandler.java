@@ -224,7 +224,7 @@ public class EntityHandler<T> {
                     try {
                         value = converter.convert(formattedValue, currentColumnInfo.getName(), rowNum);
                     } catch(Exception e) {
-                        new ZeroCellException(String.format("%s threw an exception while trying to convert value %s ", converter.getClass().getName(), formattedValue), e);
+                        throw new ZeroCellException(String.format("%s threw an exception while trying to convert value %s ", converter.getClass().getName(), formattedValue), e);
                     }
                 }
                 Field field = type.getDeclaredField(currentColumnInfo.getFieldName());

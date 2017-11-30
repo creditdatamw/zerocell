@@ -8,7 +8,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Past;
-import java.sql.Date;
 import java.time.LocalDate;
 
 /**
@@ -43,7 +42,7 @@ public class Person {
     @NotNull
     @Past
     @Column(name = "DATE_REGISTERED", index = 6)
-    private Date dateOfRegistration;
+    private LocalDate dateOfRegistration;
 
     @Column(name = "FAV_NUMBER", index = 5)
     private int favouriteNumber;
