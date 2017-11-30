@@ -143,9 +143,9 @@ It is an unchecked exception and may cause your code to stop executing if not
 handled. Typically `ZeroCellException` will wrap another exception, so it's worth 
 peeking at the cause using `Exception#getCause`.
 
-## Authors
+## CONTRIBUTING
 
-* Zikani Nyirenda Mwase <zikani@creditdatamw.com>
+See the [`CONTRIBUTING.md`](CONTRIBUTING.md) file for more information.
 
 ---
 
