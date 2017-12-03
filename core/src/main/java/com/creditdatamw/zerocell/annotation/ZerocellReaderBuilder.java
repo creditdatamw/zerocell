@@ -11,10 +11,10 @@ import java.lang.annotation.*;
 @Documented
 public @interface ZerocellReaderBuilder {
     /**
-     * The name of the generated Reader class.
-     * Defaults to the name of the class with suffix of "Reader" e.g. PersonReader
+     * Gets the name of the generated Reader class, which
+     * defaults to the name of the class with suffix of "Reader" e.g. PersonReader
      *
-     * @return
+     * @return The name of the generated Reader class.
      */
     String value() default "__none__";
 }

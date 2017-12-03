@@ -25,7 +25,8 @@ public final class ReaderUtil {
      * Reads a list of POJOs from the given excel file.
      *
      * @param file Excel file to read from
-     * @return list of the eextracted entities
+     * @param sheetName The sheet to extract from in the workbook
+     * @param reader The reader class to use to load the file from the sheet
      */
     public static void process(File file, String sheetName, ZeroCellReader reader) {
         try (FileInputStream fis = new FileInputStream(file);

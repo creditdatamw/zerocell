@@ -14,26 +14,26 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Column {
     /**
-     * Name of the column in the excelWorkbook - this must be the value in that column
-     * @return
+     *
+     * @return Name of the column in the excelWorkbook - this must be the value in that column
      */
     String name();
 
     /**
-     * Position of the column. Starts with the 0 index.
-     * @return
+     *
+     * @return Position of the column. Starts with the 0 index.
      */
     int index();
 
     /**
-     * Format for the value of the column
-     * @return
+     *
+     * @return Format for the value of the column, iff applicable
      */
     String dataFormat() default "";
 
     /**
-     * Converter to use to convert the string value to the field type's value
-     * @return
+     *
+     * @return Converter to use to convert the string value to the field type's value
      */
     Class<?> convertorClass() default NoopConverter.class;
 }
