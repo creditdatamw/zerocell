@@ -8,6 +8,7 @@
     <artifactId>zerocell-parent</artifactId>
     <version>0.2.5</version>
     <packaging>pom</packaging>
+    <url>https://github.com/creditdatamw/zerocell</url>
 
     <licenses>
         <license>
@@ -43,6 +44,7 @@
         <connection>scm:git:git://github.com/creditdatamw/zerocell.git</connection>
         <developerConnection>scm:git:git@github.com:creditdatamw/zerocell.git</developerConnection>
         <url>https://github.com/creditdatamw/zerocell</url>
+        <tag>master</tag>
     </scm>
     <issueManagement>
         <system>GitHub</system>
