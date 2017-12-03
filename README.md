@@ -1,6 +1,7 @@
 ZeroCell
 ========
 
+
 Existing Excel libraries do too much just to read data from a workbook.
 This library is optimized for *reading* data from excel only.
 Particularly, it is optimized for getting the data from an Excel Sheet
@@ -33,7 +34,7 @@ Add the following to your `pom.xml`
 <dependency>
     <groupId>com.creditdatamw.labs</groupId>
     <artifactId>zerocell-core</artifactId>
-    <version>0.2.3</version>
+    <version>0.2.5</version>
 </dependency>
 ```
 
@@ -86,7 +87,7 @@ annotation processor which generates the implementation classes.
 <dependency>
     <groupId>com.creditdatamw.labs</groupId>
     <artifactId>zerocell-processor</artifactId>
-    <version>0.2.3</version>
+    <version>0.2.5</version>
     <scope>provided</scope>
 </dependency>
 ```

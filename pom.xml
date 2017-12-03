@@ -29,6 +29,16 @@
         <poi.version>3.15</poi.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+    <developers>
+        <developer>
+            <name>Credit Data CRB Ltd</name>
+            <email>it@creditdatamw.com</email>
+            <timezone>Africa/Harare</timezone>
+            <roles>
+                <role>owner</role>
+            </roles>
+        </developer>
+    </developers>
     <scm>
         <connection>scm:git:git://github.com/creditdatamw/zerocell.git</connection>
         <developerConnection>scm:git:git@github.com:creditdatamw/zerocell.git</developerConnection>
