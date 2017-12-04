@@ -1,3 +1,6 @@
+[![](https://img.shields.io/github/license/creditdatamw/zerocell.svg)](./LICENSE)
+[![](https://img.shields.io/maven-central/v/com.creditdatamw.labs/zerocell-core.svg)](http://mvnrepository.com/artifact/com.creditdatamw.labs/zerocell-core)
+
 ZeroCell
 ========
 
