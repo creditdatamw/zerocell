@@ -31,23 +31,28 @@ provides the `SXSSFWorkbook` for writing large files in an efficient manner.
 
 ## Usage
 
-Add the following to your `pom.xml`
+There are three ways to use zerocell: via annotations, the programmatic api and using the annotation processor.
+
+First things first, add the following dependency to your `pom.xml`
 
 ```xml
 <dependency>
     <groupId>com.creditdatamw.labs</groupId>
     <artifactId>zerocell-core</artifactId>
-    <version>0.2.5</version>
+    <version>0.3.0</version>
 </dependency>
 ```
 
-## Example 
+### Using Annotations
 
-You create a class to represent a row in an Excel sheet.
+You create a class with `@Column` (and optionally `@RowNumber`) 
+annotations to represent a row in an Excel sheet and
+then use the static methods on the `Reader` class to read the 
+list of data from the file.
+
 For example:
 
 ```java
-@lombok.Data
 public class Person {
     @RowNumber
     private int rowNumber;
@@ -61,6 +66,8 @@ public class Person {
     @Column(index=2, name="DATE_OF_BIRTH")
     private LocalDate dateOfBirth;
     
+    // Getters and setters here ...
+    
     public static void main(String... args) {
         // Then using the `Reader` class you can load 
         // a list from the excel file as follows:
@@ -72,6 +79,53 @@ public class Person {
         // You can also inspect the column names of 
         // the class using the static `columnsOf` method:
         String[] columns = Reader.columnsOf(Person.class);    
+    }
+}
+```
+
+### Using the Programmatic API
+
+Since version `0.3.0` zerocell provides a non-annotation based API. 
+This allows you to work with your existing POJOs without having
+to change your sources. The only difference with the annotation based
+API is that you have to define the column mappings using the `Reader.using`
+method.
+
+For example:
+
+```java
+public class Person {
+    private int rowNumber;
+    
+    private String firstName;
+    
+    private String lastName;
+    
+    private LocalDate dateOfBirth;
+    
+    // Getters and setters here ...
+    
+    public static void main(String... args) {
+        // Then using the `Reader` class you can load 
+        // a list from the excel file as follows:
+        List<Person> people = Reader.of(Person.class)
+                            .from(new File("people.xlsx"))                            
+                            .using(
+                                new RowNumberInfo("rowNumber", Integer.class),
+                                new ColumnInfo("ID", "id", 0, String.class),
+                                new ColumnInfo("FIRST_NAME", "firstName", 1, String.class),
+                                new ColumnInfo("MIDDLE_NAME", "middleName", 2, String.class),
+                                new ColumnInfo("LAST_NAME", "lastName", 3, String.class),
+                                new ColumnInfo("DATE_OF_BIRTH", "dateOfBirth", 4, LocalDate.class),
+                                new ColumnInfo("DATE_REGISTERED", "dateOfRegistration", 6, Date.class),
+                                new ColumnInfo("FAV_NUMBER", "favouriteNumber", 5, Integer.class)
+                            )
+                            .sheet("Sheet 1")
+                            .list();
+         
+        people.forEach(person -> {
+            // Do something with person here    
+        });    
     }
 }
 ```
@@ -90,11 +144,10 @@ annotation processor which generates the implementation classes.
 <dependency>
     <groupId>com.creditdatamw.labs</groupId>
     <artifactId>zerocell-processor</artifactId>
-    <version>0.2.5</version>
+    <version>0.3.0</version>
     <scope>provided</scope>
 </dependency>
 ```
-
 
 Then, in your code use the `@ZerocellReaderBuilder` annotation on a class
 that contains ZeroCell `@Column` annotations.
