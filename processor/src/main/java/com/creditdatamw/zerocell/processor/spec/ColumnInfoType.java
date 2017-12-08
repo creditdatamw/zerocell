@@ -2,8 +2,6 @@ package com.creditdatamw.zerocell.processor.spec;
 
 import com.creditdatamw.zerocell.ZeroCellException;
 import com.creditdatamw.zerocell.annotation.Column;
-import lombok.AllArgsConstructor;
-import lombok.Data;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
@@ -16,8 +14,6 @@ import java.util.Objects;
 /**
  * Custom "type" class representing a column
  */
-@Data
-@AllArgsConstructor
 class ColumnInfoType {
     private String name;
 
@@ -30,6 +26,63 @@ class ColumnInfoType {
     private TypeMirror type;
 
     private TypeMirror converterClass;
+
+    public ColumnInfoType(String name, String fieldName, int index, String dataFormat, TypeMirror type, TypeMirror converterClass) {
+        this.name = name;
+        this.fieldName = fieldName;
+        this.index = index;
+        this.dataFormat = dataFormat;
+        this.type = type;
+        this.converterClass = converterClass;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getFieldName() {
+        return fieldName;
+    }
+
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
+    }
+
+    public int getIndex() {
+        return index;
+    }
+
+    public void setIndex(int index) {
+        this.index = index;
+    }
+
+    public String getDataFormat() {
+        return dataFormat;
+    }
+
+    public void setDataFormat(String dataFormat) {
+        this.dataFormat = dataFormat;
+    }
+
+    public TypeMirror getType() {
+        return type;
+    }
+
+    public void setType(TypeMirror type) {
+        this.type = type;
+    }
+
+    public TypeMirror getConverterClass() {
+        return converterClass;
+    }
+
+    public void setConverterClass(TypeMirror converterClass) {
+        this.converterClass = converterClass;
+    }
 
     /**
      * Extracts the @{@link Column} annotations from the typeElement
