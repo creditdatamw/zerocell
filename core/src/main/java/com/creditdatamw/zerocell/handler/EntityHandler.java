@@ -6,6 +6,7 @@ import com.creditdatamw.zerocell.ZeroCellReader;
 import com.creditdatamw.zerocell.annotation.Column;
 import com.creditdatamw.zerocell.annotation.RowNumber;
 import com.creditdatamw.zerocell.column.ColumnInfo;
+import com.creditdatamw.zerocell.column.ColumnMapping;
 import com.creditdatamw.zerocell.converter.Converter;
 import com.creditdatamw.zerocell.converter.Converters;
 import com.creditdatamw.zerocell.converter.NoopConverter;
@@ -38,18 +39,55 @@ public class EntityHandler<T> {
         Objects.requireNonNull(clazz);
         this.type = clazz;
         this.sheetName = DEFAULT_SHEET;
-        this.entitySheetHandler = createSheetHandler(clazz);
+        this.entitySheetHandler = createSheetHandler(clazz, null);
     }
 
     public EntityHandler(Class<T> clazz, String sheetName) {
         Objects.requireNonNull(clazz);
         this.type = clazz;
         this.sheetName = sheetName;
-        this.entitySheetHandler = createSheetHandler(clazz);
+        this.entitySheetHandler = createSheetHandler(clazz, null);
+    }
+
+    public EntityHandler(Class<T> clazz,ColumnMapping columnMapping) {
+        Objects.requireNonNull(clazz);
+        this.type = clazz;
+        this.sheetName = DEFAULT_SHEET;
+        this.entitySheetHandler = createSheetHandler(clazz, columnMapping);
+    }
+
+    public EntityHandler(Class<T> clazz, String sheetName, ColumnMapping columnMapping) {
+        Objects.requireNonNull(clazz);
+        this.type = clazz;
+        this.sheetName = sheetName;
+        this.entitySheetHandler = createSheetHandler(clazz, columnMapping);
     }
 
     @SuppressWarnings("unchecked")
-    private EntityExcelSheetHandler<T> createSheetHandler(Class<T> clazz) {
+    private EntityExcelSheetHandler<T> createSheetHandler(Class<T> clazz, ColumnMapping columnMapping) {
+        if (columnMapping == null) {
+            columnMapping = readColumnInfoViaReflection(clazz);
+        }
+        final ColumnInfo rowNumberColumn = columnMapping.getRowNumberInfo();
+        final List<ColumnInfo> list = columnMapping.getColumns();
+        final ColumnInfo[] columns = new ColumnInfo[list.size()];
+        int index = 0;
+        for(ColumnInfo columnInfo: list) {
+            index = columnInfo.getIndex();
+            if (index > columns.length - 1) {
+                throw new ZeroCellException(
+                        "Column index out of range. index=" + index + " columnCount=" + columns.length
+                        + ". Ensure there @Column annotations for all indexes from 0 to " + (columns.length - 1));
+            }
+            if (! Objects.isNull(columns[index])) {
+                throw new ZeroCellException("Cannot map two columns to the same index: " + index);
+            }
+            columns[index] = columnInfo;
+        }
+        return new EntityExcelSheetHandler(rowNumberColumn, columns);
+    }
+
+    private ColumnMapping readColumnInfoViaReflection(Class<?> clazz) {
         Field[] fieldArray = clazz.getDeclaredFields();
         ArrayList<ColumnInfo> list = new ArrayList<>(fieldArray.length);
         ColumnInfo rowNumberColumn = null;
@@ -66,11 +104,11 @@ public class EntityHandler<T> {
             if (! Objects.isNull(annotation)) {
                 Class<?> converter = annotation.convertorClass();
                 list.add(new ColumnInfo(annotation.name().trim(),
-                                       field.getName(),
-                                       annotation.index(),
-                                       annotation.dataFormat(),
-                                       field.getType(),
-                                       converter));
+                        field.getName(),
+                        annotation.index(),
+                        annotation.dataFormat(),
+                        field.getType(),
+                        converter));
             }
         }
 
@@ -78,22 +116,7 @@ public class EntityHandler<T> {
             throw new ZeroCellException(String.format("Class %s does not have @Column annotations", clazz.getName()));
         }
         list.trimToSize();
-        final ColumnInfo[] columns = new ColumnInfo[list.size()];
-        int index = 0;
-        for(ColumnInfo columnInfo: list) {
-            index = columnInfo.getIndex();
-            if (index > columns.length - 1) {
-                throw new ZeroCellException(
-                        "Column index out of range. index=" + index + " columnCount=" + columns.length
-                        + ". Ensure there @Column annotations for all indexes from 0 to " + (columns.length - 1));
-            }
-            if (! Objects.isNull(columns[index])) {
-                throw new ZeroCellException("Cannot map two columns to the same index: " + index);
-            }
-            columns[index] = columnInfo;
-        }
-        list = null;
-        return new EntityExcelSheetHandler(rowNumberColumn, columns);
+        return new ColumnMapping(rowNumberColumn, list);
     }
 
     /**

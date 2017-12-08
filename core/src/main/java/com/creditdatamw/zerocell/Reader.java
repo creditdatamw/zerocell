@@ -1,7 +1,9 @@
 package com.creditdatamw.zerocell;
 
-import com.creditdatamw.zerocell.handler.EntityHandler;
 import com.creditdatamw.zerocell.column.ColumnInfo;
+import com.creditdatamw.zerocell.column.ColumnMapping;
+import com.creditdatamw.zerocell.column.RowNumberInfo;
+import com.creditdatamw.zerocell.handler.EntityHandler;
 
 import java.io.File;
 import java.util.List;
@@ -24,6 +26,7 @@ public class Reader {
         private final Class<T> clazz;
         private File file;
         private String sheetName;
+        private ColumnMapping columnMapping;
 
         public ReaderBuilder(Class<T> clazz) {
             this.clazz = clazz;
@@ -35,6 +38,16 @@ public class Reader {
             return this;
         }
 
+        public ReaderBuilder using(RowNumberInfo rowNumberInfo, ColumnInfo... columns) {
+            this.columnMapping = new ColumnMapping(rowNumberInfo, columns);
+            return this;
+        }
+
+        public ReaderBuilder using(ColumnInfo... columns) {
+            this.columnMapping = new ColumnMapping(null, columns);
+            return this;
+        }
+
         public ReaderBuilder sheet(String sheetName) {
             Objects.requireNonNull(sheetName);
             this.sheetName = sheetName;
@@ -42,7 +55,16 @@ public class Reader {
         }
 
         public <T> List<T> list() {
-            EntityHandler<T> entityHandler = Objects.isNull(sheetName) ? new EntityHandler(clazz) : new EntityHandler(clazz, sheetName);
+            EntityHandler<T> entityHandler;
+            if (!Objects.isNull(sheetName) && !Objects.isNull(columnMapping)) {
+                entityHandler = new EntityHandler(clazz, sheetName, columnMapping);
+            } else if (Objects.isNull(sheetName) && !Objects.isNull(columnMapping)) {
+                entityHandler = new EntityHandler(clazz, columnMapping);
+            } else if (!Objects.isNull(sheetName) && Objects.isNull(columnMapping)) {
+                entityHandler = new EntityHandler(clazz, sheetName);
+            } else {
+                entityHandler = new EntityHandler(clazz);
+            }
             entityHandler.process(file);
             return entityHandler.readAsList();
         }

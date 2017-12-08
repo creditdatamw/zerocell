@@ -1,6 +1,7 @@
 package com.creditdatamw.zerocell.column;
 
 import com.creditdatamw.zerocell.annotation.Column;
+import com.creditdatamw.zerocell.converter.NoopConverter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.slf4j.LoggerFactory;
@@ -14,7 +15,6 @@ import java.util.Objects;
  * Information about a Column in a Java Bean
  */
 @Getter
-@AllArgsConstructor
 public class ColumnInfo {
     private String name;
 
@@ -27,6 +27,24 @@ public class ColumnInfo {
     private Class<?> type;
 
     private Class<?> converterClass;
+
+    public ColumnInfo(String name, String fieldName, int index, Class<?> dataType) {
+        this.name = name;
+        this.fieldName = fieldName;
+        this.index = index;
+        this.dataFormat = "";
+        this.type = dataType;
+        this.converterClass = NoopConverter.class;
+    }
+
+    public ColumnInfo(String name, String fieldName, int index, String dataFormat, Class<?> type, Class<?> converterClass) {
+        this.name = name;
+        this.fieldName = fieldName;
+        this.index = index;
+        this.dataFormat = dataFormat;
+        this.type = type;
+        this.converterClass = converterClass;
+    }
 
     public static final List<Column> annotationsOf(Class<?> clazz) {
         Field[] fieldArray = clazz.getDeclaredFields();
