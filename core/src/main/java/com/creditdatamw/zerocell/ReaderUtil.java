@@ -14,6 +14,7 @@ import org.xml.sax.XMLReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.io.PushbackInputStream;
 import java.util.Objects;
 
 /**
@@ -30,7 +31,8 @@ public final class ReaderUtil {
      */
     public static void process(File file, String sheetName, ZeroCellReader reader) {
         try (FileInputStream fis = new FileInputStream(file);
-             OPCPackage opcPackage = OPCPackage.open(fis)) {
+             PushbackInputStream p = new PushbackInputStream(fis, 16);
+             OPCPackage opcPackage = OPCPackage.open(p)) {
 
             DataFormatter dataFormatter = new DataFormatter();
             ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(opcPackage);
