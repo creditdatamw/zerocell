@@ -24,7 +24,7 @@ public class CellMethodSpec {
         LoggerFactory.getLogger(ZeroCellAnnotationProcessor.class)
                      .info("Found {} columns in source class", columns.size());
         columns.forEach(column -> {
-            String staticFieldName = "COL_" + column.getName();
+            String staticFieldName = "COL_" + column.getIndex();
             String fieldName = column.getFieldName();
 
             String beanSetterProperty = beanSetterPropertyName(fieldName);

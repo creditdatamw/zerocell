@@ -23,6 +23,8 @@ public class ReaderTypeSpec {
     private final TypeElement typeElement;
     private final String readerClassName;
 
+    private static final String INVALID_CHARS_REGEX = "\\s";
+
     public ReaderTypeSpec(TypeElement typeElement, Optional<String> customReaderName) {
         Objects.requireNonNull(typeElement);
         this.typeElement = typeElement;
@@ -111,7 +113,7 @@ public class ReaderTypeSpec {
         columnInfoList.forEach(column -> {
             int idx= column.getIndex();
             String name = column.getName();
-            String normalizedName = String.format("COL_%s", name.replaceAll("\\s", "_")).toUpperCase();
+            String normalizedName = String.format("COL_%s", column.getIndex()).toUpperCase();
             columnIndexFields.add(FieldSpec.builder(
                     Integer.TYPE,
                     normalizedName,
