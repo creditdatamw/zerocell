@@ -1,5 +1,7 @@
 package com.creditdatamw.zerocell;
 
+import org.apache.poi.EmptyFileException;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.ss.usermodel.DataFormatter;
@@ -62,7 +64,7 @@ public final class ReaderUtil {
             stylesTable = null;
             strings = null;
             xssfReader = null;
-        } catch(org.apache.poi.openxml4j.exceptions.InvalidFormatException | NotOfficeXmlFileException ife) {
+        } catch(InvalidFormatException | EmptyFileException | NotOfficeXmlFileException ife) {
             throw new ZeroCellException("Cannot load file. The file must be an Excel 2007+ Workbook (.xlsx)");
         } catch(SheetNotFoundException ex) {
             throw new ZeroCellException(ex.getMessage());

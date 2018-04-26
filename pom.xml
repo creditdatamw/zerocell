@@ -27,7 +27,7 @@
 	<description>Read from Excel files to POJO's really fast!</description>
 
     <properties>
-        <poi.version>3.15</poi.version>
+        <poi.version>3.17</poi.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <developers>
