@@ -27,6 +27,7 @@ public class Reader {
         private File file;
         private String sheetName;
         private ColumnMapping columnMapping;
+        private boolean skipHeaderRow = false;
 
         public ReaderBuilder(Class<T> clazz) {
             this.clazz = clazz;
@@ -54,16 +55,21 @@ public class Reader {
             return this;
         }
 
+        public ReaderBuilder skipHeaderRow(boolean value) {
+            this.skipHeaderRow = value;
+            return this;
+        }
+
         public <T> List<T> list() {
             EntityHandler<T> entityHandler;
             if (!Objects.isNull(sheetName) && !Objects.isNull(columnMapping)) {
-                entityHandler = new EntityHandler(clazz, sheetName, columnMapping);
+                entityHandler = new EntityHandler(clazz, sheetName, columnMapping, skipHeaderRow);
             } else if (Objects.isNull(sheetName) && !Objects.isNull(columnMapping)) {
-                entityHandler = new EntityHandler(clazz, columnMapping);
+                entityHandler = new EntityHandler(clazz, columnMapping, skipHeaderRow);
             } else if (!Objects.isNull(sheetName) && Objects.isNull(columnMapping)) {
-                entityHandler = new EntityHandler(clazz, sheetName);
+                entityHandler = new EntityHandler(clazz, sheetName, skipHeaderRow);
             } else {
-                entityHandler = new EntityHandler(clazz);
+                entityHandler = new EntityHandler(clazz, skipHeaderRow);
             }
             entityHandler.process(file);
             return entityHandler.readAsList();

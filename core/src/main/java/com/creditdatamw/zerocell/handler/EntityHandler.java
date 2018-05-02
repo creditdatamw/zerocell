@@ -34,33 +34,38 @@ public class EntityHandler<T> {
     private final Class<T> type;
     private final EntityExcelSheetHandler<T> entitySheetHandler;
     private final String sheetName;
+    private final boolean skipHeaderRow;
 
-    public EntityHandler(Class<T> clazz) {
+    public EntityHandler(Class<T> clazz, boolean skipHeaderRow) {
         Objects.requireNonNull(clazz);
         this.type = clazz;
         this.sheetName = DEFAULT_SHEET;
         this.entitySheetHandler = createSheetHandler(clazz, null);
+        this.skipHeaderRow = skipHeaderRow;
     }
 
-    public EntityHandler(Class<T> clazz, String sheetName) {
+    public EntityHandler(Class<T> clazz, String sheetName, boolean skipHeaderRow) {
         Objects.requireNonNull(clazz);
         this.type = clazz;
         this.sheetName = sheetName;
         this.entitySheetHandler = createSheetHandler(clazz, null);
+        this.skipHeaderRow = skipHeaderRow;
     }
 
-    public EntityHandler(Class<T> clazz,ColumnMapping columnMapping) {
+    public EntityHandler(Class<T> clazz, ColumnMapping columnMapping, boolean skipHeaderRow) {
         Objects.requireNonNull(clazz);
         this.type = clazz;
         this.sheetName = DEFAULT_SHEET;
         this.entitySheetHandler = createSheetHandler(clazz, columnMapping);
+        this.skipHeaderRow = skipHeaderRow;
     }
 
-    public EntityHandler(Class<T> clazz, String sheetName, ColumnMapping columnMapping) {
+    public EntityHandler(Class<T> clazz, String sheetName, ColumnMapping columnMapping, boolean skipHeaderRow) {
         Objects.requireNonNull(clazz);
         this.type = clazz;
         this.sheetName = sheetName;
         this.entitySheetHandler = createSheetHandler(clazz, columnMapping);
+        this.skipHeaderRow = skipHeaderRow;
     }
 
     @SuppressWarnings("unchecked")
@@ -216,7 +221,7 @@ public class EntityHandler<T> {
 
             ColumnInfo currentColumnInfo = columns[column];
 
-            if (isHeaderRow) {
+            if (isHeaderRow && !skipHeaderRow) {
                 if (! currentColumnInfo.getName().equalsIgnoreCase(formattedValue.trim())){
                     throw new ZeroCellException(String.format("Expected Column '%s' but found '%s'", currentColumnInfo.getName(), formattedValue));
                 }
