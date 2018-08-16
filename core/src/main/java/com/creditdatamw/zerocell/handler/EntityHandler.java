@@ -143,6 +143,8 @@ public class EntityHandler<T> {
         private final ColumnInfo rowNumberColumn;
         private final ColumnInfo[] columns;
         private final List<T> entities;
+        private final Converter NOOP_CONVERTER = new NoopConverter();
+        private final Converter[] converters;
         private final int MAXIMUM_COL_INDEX;
 
         private boolean isHeaderRow = false;
@@ -153,8 +155,24 @@ public class EntityHandler<T> {
         EntityExcelSheetHandler(ColumnInfo rowNumberColumn, ColumnInfo[] columns) {
             this.rowNumberColumn = rowNumberColumn;
             this.columns = columns;
+            this.converters = cacheConverters();
             this.entities = new ArrayList<>();
             this.MAXIMUM_COL_INDEX = columns.length - 1;
+        }
+
+        private Converter[] cacheConverters() {
+            Converter[] cv = new Converter[columns.length];
+            for (ColumnInfo c: columns) {
+                cv[c.getIndex()] = NOOP_CONVERTER;
+                try {
+                    if (!c.getConverterClass().equals(NoopConverter.class)) {
+                        cv[c.getIndex()] = (Converter) c.getConverterClass().newInstance();
+                    }
+                } catch (InstantiationException | IllegalAccessException e) {
+                    LOGGER.error("Failed to instantiate Converter class: {}", c.getConverterClass());
+                }
+            }
+            return cv;
         }
 
         @Override
@@ -242,7 +260,10 @@ public class EntityHandler<T> {
         private void writeColumnField(T object, String formattedValue, ColumnInfo currentColumnInfo, int rowNum) {
             String fieldName = currentColumnInfo.getFieldName();
             try {
-                Converter converter = (Converter) currentColumnInfo.getConverterClass().newInstance();
+                Converter converter = NOOP_CONVERTER;
+                if (currentColumnInfo.getIndex() != -1 && currentColumnInfo.getIndex() < columns.length) {
+                    converter = converters[currentColumnInfo.getIndex()];
+                }
                 Object value = null;
                 // Don't use a converter if there isn't a custom one
                 if (converter instanceof NoopConverter) {
@@ -264,7 +285,7 @@ public class EntityHandler<T> {
                 field.setAccessible(field.isAccessible() && access);
             } catch (IllegalArgumentException e) {
                 throw new ZeroCellException(String.format("Failed to write value %s to field %s at row %s", formattedValue, fieldName, rowNum));
-            } catch (InstantiationException | NoSuchFieldException | IllegalAccessException e) {
+            } catch (NoSuchFieldException | IllegalAccessException e) {
                 LOGGER.error("Failed to set field: {}", fieldName, e);
             }
         }
