@@ -83,40 +83,42 @@ public class Person {
 
 ### Using the Programmatic API
 
-If you don't fancy using annotations you can map the columns to the fields simply
-because since version `0.3.0` zerocell provides a non-annotation based API. 
-This allows you to work with your existing classes without having
-to change your sources. The only difference with the annotation based
-API is that you have to define the column mappings via the `Reader.using` method.
+If you don't want to use annotations you can still use ZeroCell to load from Excel sheet
+to your Java objects without too much work. The only difference with the annotation approach
+ is that you have to define the column mappings via the `Reader.using` method.
 
 For example:
 
 ```java
 public class Person {
-    private int rowNumber;
+    private int rowNo;
     
+    private String id;
+	
     private String firstName;
     
+    private String middleName;
+	
     private String lastName;
     
     private LocalDate dateOfBirth;
+	
+    private LocalDate dateOfRegistration;
     
     // Getters and setters here ...
     
     public static void main(String... args) {
-        // Then using the `Reader` class you can load 
-        // a list from the excel file as follows:
+        // Map the columns using, Reader.using method here
         List<Person> people = Reader.of(Person.class)
                             .from(new File("people.xlsx"))                            
                             .using(
-                                new RowNumberInfo("rowNumber", Integer.class),
+                                new RowNumberInfo("rowNo", Integer.class),
                                 new ColumnInfo("ID", "id", 0, String.class),
                                 new ColumnInfo("FIRST_NAME", "firstName", 1, String.class),
                                 new ColumnInfo("MIDDLE_NAME", "middleName", 2, String.class),
                                 new ColumnInfo("LAST_NAME", "lastName", 3, String.class),
                                 new ColumnInfo("DATE_OF_BIRTH", "dateOfBirth", 4, LocalDate.class),
-                                new ColumnInfo("DATE_REGISTERED", "dateOfRegistration", 6, Date.class),
-                                new ColumnInfo("FAV_NUMBER", "favouriteNumber", 5, Integer.class)
+                                new ColumnInfo("DATE_REGISTERED", "dateOfRegistration", 5, Date.class)
                             )
                             .sheet("Sheet 1")
                             .list();
@@ -134,9 +136,9 @@ ZeroCell provides an annotation processor to generate Reader
 classes to read records from Excel without Runtime reflection 
 which makes the code amenable to better auditing and customization.
 
-In order to use the functionality you will first need to add 
-the dependency to your POM. This adds a compile-time 
-annotation processor which generates the implementation classes. 
+In order to use the functionality you will _need_ to add 
+the `zerocell-processor` dependency to your POM. This adds a compile-time 
+annotation processor which generates the classes:
 
 ```xml
 <dependency>
