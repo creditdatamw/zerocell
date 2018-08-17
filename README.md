@@ -4,29 +4,27 @@
 ZeroCell
 ========
 
+ZeroCell provides a simple API for loading data from Excel sheets into 
+Plain Old Java Objects (POJOs) using annotations to map columns from an Excel sheet 
+to fields in Java classes. 
 
-Existing Excel libraries do too much just to read data from a workbook.
-This library is optimized for *reading* data from excel only.
-Particularly, it is optimized for getting the data from an Excel Sheet
-into POJOs (Plain Old Java Objects) and has a very simple API. 
+In case you don't fancy annotations or don't want to have to change your existing classes, 
+you can map the columns to the fields without the annotations.
 
-## Goals 
+## Why should I use this?
 
-* Get POJOs from Excel with lower overheads i.e. read excel files with 
-as few resources as possible
-* Provide mappings for POJOs to excel rows via annotations
-* Generate Excel readers via a compile-time annotation processor
-* Provide a simple low-ceremony API
+The library doesn't use the same approach that Apache POIs usermodel API and 
+other POI based libraries use to process/store data loaded from the Excel file 
+as a result it uses less resources as it doesn't process things such as Cell styles that take up memory.
+You also don't have to spend time setting data from cells to your Java objects, just
+define the mappings and let ZeroCell handle the rest.
 
-## Non-Goals
+## What ZeroCell _cannot_ do for you
 
+* Make you Coffee
 * Read or process excel workbook styles and other visual effects
-* Writing to excel files
-* Loading data into complex object hierarchies.
-
-## Why not handle writing?
-
-The Apache POI project has a good API for dealing with excel files and
+* Load data into complex object hierarchies
+* Write to excel files: The Apache POI library (which we use underneath) has a good API for writing to Excel files and
 provides the `SXSSFWorkbook` for writing large files in an efficient manner.
 
 ## Usage
@@ -85,11 +83,11 @@ public class Person {
 
 ### Using the Programmatic API
 
-Since version `0.3.0` zerocell provides a non-annotation based API. 
-This allows you to work with your existing POJOs without having
+If you don't fancy using annotations you can map the columns to the fields simply
+because since version `0.3.0` zerocell provides a non-annotation based API. 
+This allows you to work with your existing classes without having
 to change your sources. The only difference with the annotation based
-API is that you have to define the column mappings using the `Reader.using`
-method.
+API is that you have to define the column mappings via the `Reader.using` method.
 
 For example:
 
@@ -206,4 +204,4 @@ See the [`CONTRIBUTING.md`](CONTRIBUTING.md) file for more information.
 
 ---
 
-Copyright (c) 2017, Credit Data CRB Ltd
+Copyright (c) 2018, Credit Data CRB Ltd
