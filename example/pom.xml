@@ -42,7 +42,7 @@
                     <arguments>
                         <argument>-classpath</argument>
                         <classpath/>
-                        <argument>com.creditdatamw.zerocell.example.ExampleApplication</argument>
+                        <argument>com.creditdatamw.zerocell.example.BasicUsageExample</argument>
                     </arguments>
                 </configuration>
             </plugin>
