@@ -18,7 +18,7 @@ public class Reader {
         return ColumnInfo.columnsOf(clazz);
     }
 
-    public static <T> ReaderBuilder of(Class<T> clazz) {
+    public static <T> ReaderBuilder<T> of(Class<T> clazz) {
         return new ReaderBuilder<>(clazz);
     }
 
@@ -33,29 +33,29 @@ public class Reader {
             this.clazz = clazz;
         }
 
-        public ReaderBuilder from(File file) {
+        public ReaderBuilder<T> from(File file) {
             Objects.requireNonNull(file);
             this.file = file;
             return this;
         }
 
-        public ReaderBuilder using(RowNumberInfo rowNumberInfo, ColumnInfo... columns) {
+        public ReaderBuilder<T> using(RowNumberInfo rowNumberInfo, ColumnInfo... columns) {
             this.columnMapping = new ColumnMapping(rowNumberInfo, columns);
             return this;
         }
 
-        public ReaderBuilder using(ColumnInfo... columns) {
+        public ReaderBuilder<T> using(ColumnInfo... columns) {
             this.columnMapping = new ColumnMapping(null, columns);
             return this;
         }
 
-        public ReaderBuilder sheet(String sheetName) {
+        public ReaderBuilder<T> sheet(String sheetName) {
             Objects.requireNonNull(sheetName);
             this.sheetName = sheetName;
             return this;
         }
 
-        public ReaderBuilder skipHeaderRow(boolean value) {
+        public ReaderBuilder<T> skipHeaderRow(boolean value) {
             this.skipHeaderRow = value;
             return this;
         }
