@@ -13,10 +13,7 @@ import org.apache.poi.xssf.model.StylesTable;
 import org.xml.sax.InputSource;
 import org.xml.sax.XMLReader;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.io.PushbackInputStream;
+import java.io.*;
 import java.util.Objects;
 
 /**
@@ -32,8 +29,22 @@ public final class ReaderUtil {
      * @param reader The reader class to use to load the file from the sheet
      */
     public static void process(File file, String sheetName, ZeroCellReader reader) {
-        try (FileInputStream fis = new FileInputStream(file);
-             PushbackInputStream p = new PushbackInputStream(fis, 16);
+        try (FileInputStream fis = new FileInputStream(file)) {
+            process(fis, sheetName, reader);
+        } catch (IOException ioe) {
+            throw new ZeroCellException("Failed to process file", ioe);
+        }
+    }
+
+    /**
+     * Reads a list of POJOs from the given input stream.
+     *
+     * @param is InputStream to read Excel file from
+     * @param sheetName The sheet to extract from in the workbook
+     * @param reader The reader class to use to load the file from the sheet
+     */
+    public static void process(InputStream is, String sheetName, ZeroCellReader reader) {
+        try (PushbackInputStream p = new PushbackInputStream(is, 16);
              OPCPackage opcPackage = OPCPackage.open(p)) {
 
             DataFormatter dataFormatter = new DataFormatter();
