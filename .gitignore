@@ -18,3 +18,4 @@ template_schemas
 dependency-reduced-pom.xml
 notes
 backups/
+pom.xml.versionsBackup
