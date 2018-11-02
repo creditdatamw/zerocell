@@ -28,6 +28,7 @@ public class Reader {
         private String sheetName;
         private ColumnMapping columnMapping;
         private boolean skipHeaderRow = false;
+        private int skipFirstNRows = 0;
 
         public ReaderBuilder(Class<T> clazz) {
             this.clazz = clazz;
@@ -60,16 +61,27 @@ public class Reader {
             return this;
         }
 
+        /**
+         * Set the number of rows to skip before the header
+         * @param value
+         * @return
+         */
+        public ReaderBuilder<T> skipFirstNRows(int value) {
+            assert(value > 0);
+            this.skipFirstNRows = value;
+            return this;
+        }
+
         public <T> List<T> list() {
             EntityHandler<T> entityHandler;
             if (!Objects.isNull(sheetName) && !Objects.isNull(columnMapping)) {
-                entityHandler = new EntityHandler(clazz, sheetName, columnMapping, skipHeaderRow);
+                entityHandler = new EntityHandler(clazz, sheetName, columnMapping, skipHeaderRow, skipFirstNRows);
             } else if (Objects.isNull(sheetName) && !Objects.isNull(columnMapping)) {
-                entityHandler = new EntityHandler(clazz, columnMapping, skipHeaderRow);
+                entityHandler = new EntityHandler(clazz, columnMapping, skipHeaderRow, skipFirstNRows);
             } else if (!Objects.isNull(sheetName) && Objects.isNull(columnMapping)) {
-                entityHandler = new EntityHandler(clazz, sheetName, skipHeaderRow);
+                entityHandler = new EntityHandler(clazz, sheetName, skipHeaderRow, skipFirstNRows);
             } else {
-                entityHandler = new EntityHandler(clazz, skipHeaderRow);
+                entityHandler = new EntityHandler(clazz, skipHeaderRow, skipFirstNRows);
             }
             entityHandler.process(file);
             return entityHandler.readAsList();

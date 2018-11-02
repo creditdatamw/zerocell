@@ -35,37 +35,46 @@ public class EntityHandler<T> {
     private final EntityExcelSheetHandler<T> entitySheetHandler;
     private final String sheetName;
     private final boolean skipHeaderRow;
+    private final int skipFirstNRows;
 
-    public EntityHandler(Class<T> clazz, boolean skipHeaderRow) {
+    public EntityHandler(Class<T> clazz, boolean skipHeaderRow, int skipFirstNRows) {
         Objects.requireNonNull(clazz);
+        assert(skipFirstNRows >= 0);
         this.type = clazz;
         this.sheetName = DEFAULT_SHEET;
         this.entitySheetHandler = createSheetHandler(clazz, null);
         this.skipHeaderRow = skipHeaderRow;
+        this.skipFirstNRows = skipFirstNRows;
     }
 
-    public EntityHandler(Class<T> clazz, String sheetName, boolean skipHeaderRow) {
+    public EntityHandler(Class<T> clazz, String sheetName, boolean skipHeaderRow, int skipFirstNRows) {
         Objects.requireNonNull(clazz);
+        assert(skipFirstNRows >= 0);
         this.type = clazz;
         this.sheetName = sheetName;
         this.entitySheetHandler = createSheetHandler(clazz, null);
         this.skipHeaderRow = skipHeaderRow;
+        this.skipFirstNRows = skipFirstNRows;
     }
 
-    public EntityHandler(Class<T> clazz, ColumnMapping columnMapping, boolean skipHeaderRow) {
+    public EntityHandler(Class<T> clazz, ColumnMapping columnMapping, boolean skipHeaderRow, int skipFirstNRows) {
         Objects.requireNonNull(clazz);
+        assert(skipFirstNRows >= 0);
         this.type = clazz;
         this.sheetName = DEFAULT_SHEET;
         this.entitySheetHandler = createSheetHandler(clazz, columnMapping);
         this.skipHeaderRow = skipHeaderRow;
+        this.skipFirstNRows = skipFirstNRows;
     }
 
-    public EntityHandler(Class<T> clazz, String sheetName, ColumnMapping columnMapping, boolean skipHeaderRow) {
+    public EntityHandler(Class<T> clazz, String sheetName, ColumnMapping columnMapping, boolean skipHeaderRow, int skipFirstNRows) {
         Objects.requireNonNull(clazz);
+        assert(skipFirstNRows >= 0);
         this.type = clazz;
         this.sheetName = sheetName;
         this.entitySheetHandler = createSheetHandler(clazz, columnMapping);
         this.skipHeaderRow = skipHeaderRow;
+        this.skipFirstNRows = skipFirstNRows;
     }
 
     @SuppressWarnings("unchecked")
@@ -194,6 +203,9 @@ public class EntityHandler<T> {
         @SuppressWarnings("unchecked")
         public void startRow(int i) {
             currentRow = i;
+            //skip the current row
+            if (currentRow - skipFirstNRows < 0) return;
+            currentRow = currentRow - skipFirstNRows;
             // skip the header row
             if (currentRow == 0) {
                 isHeaderRow = true;
@@ -205,7 +217,7 @@ public class EntityHandler<T> {
                 cur = (T) type.newInstance();
                 // Write to the field with the @RowNumber annotation here if it exists
                 if (! Objects.isNull(rowNumberColumn)) {
-                    writeColumnField(cur, String.valueOf(i), rowNumberColumn, i);
+                    writeColumnField(cur, String.valueOf(currentRow), rowNumberColumn, currentRow);
                 }
             } catch (InstantiationException | IllegalAccessException e) {
                 throw new ZeroCellException("Failed to create and instance of " + type.getName(), e);

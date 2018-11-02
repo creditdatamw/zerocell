@@ -44,6 +44,23 @@ public class TestReader {
     }
 
     @Test
+    public void testShouldSkipFirst3RowsFromFile() {
+        List<Person> people = Reader.of(Person.class)
+                                .from(new File("src/test/resources/test_people_with_offset_header.xlsx"))
+                                .sheet("uploads")
+                                .skipFirstNRows(3)
+                                .list();
+        assertNotNull(people);
+        assertFalse(people.isEmpty());
+        assertEquals(5, people.size());
+
+        Person zikani = people.get(0);
+
+        assertEquals(1, zikani.getRowNumber());
+        assertEquals("Zikani", zikani.getFirstName());
+    }
+
+    @Test
     public void testShouldExtractColumns() {
         String[] columnNames = new String[] {
             "ID", "FIRST_NAME", "MIDDLE_NAME", "LAST_NAME", "DATE_OF_BIRTH", "FAV_NUMBER", "DATE_REGISTERED"
