@@ -233,7 +233,7 @@ public class EntityHandler<T> {
             // We ignore additional cells here since we only care about the cells
             // in the columns array i.e. the defined columns
             if (column > MAXIMUM_COL_INDEX) {
-                LOGGER.warn("Invalid Column index found: " + column);
+                LOGGER.trace("Invalid Column index found: " + column);
                 return;
             }
 
