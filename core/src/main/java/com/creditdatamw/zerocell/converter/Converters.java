@@ -101,8 +101,8 @@ public class Converters {
         try {
             return Boolean.valueOf(formattedValue == null ? "FALSE" : "TRUE");
         } catch(Exception e) {
-            LOGGER.error("Failed to parse {} as Boolean. Using default of null at column={} row={} ", formattedValue, columnName, rowNum);
-            return null;
+            LOGGER.error("Failed to parse {} as Boolean. Using default of false at column={} row={} ", formattedValue, columnName, rowNum);
+            return Boolean.FALSE;
         }
     });
 
