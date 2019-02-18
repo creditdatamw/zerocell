@@ -20,7 +20,7 @@ The supported workflow for contributing is as follows:
 
 ## Style
 
-We use [FindBugs][findbugs], which uses static analysis to look for bugs 
+We use [SpotBugs][spotbugs], which uses static analysis to look for bugs 
 in Java code, to catch common bugs and we generally follow a style guide 
 similar to the [Google Java Style Guide][style] with exception on 
 indentation (we use 4 spaces)
@@ -52,5 +52,5 @@ approved, your commits will be brought into the internal system for additional
 testing. Once the changes are merged internally, they will be pushed back to
 GitHub.
 
-[findbugs]: http://findbugs.sourceforge.net/
+[findbugs]: https://spotbugs.github.io/
 [style]: https://google.github.io/styleguide/javaguide.html
