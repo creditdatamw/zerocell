@@ -52,5 +52,5 @@ approved, your commits will be brought into the internal system for additional
 testing. Once the changes are merged internally, they will be pushed back to
 GitHub.
 
-[findbugs]: https://spotbugs.github.io/
+[spotbugs]: https://spotbugs.github.io/
 [style]: https://google.github.io/styleguide/javaguide.html

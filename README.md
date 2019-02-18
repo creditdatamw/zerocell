@@ -21,11 +21,9 @@ define the mappings and let ZeroCell handle the rest.
 
 ## What ZeroCell _cannot_ do for you
 
-* Make you Coffee
 * Read or process excel workbook styles and other visual effects
 * Load data into complex object hierarchies
-* Write to excel files: The Apache POI library (which we use underneath) has a good API for writing to Excel files and
-provides the `SXSSFWorkbook` for writing large files in an efficient manner.
+* Write to excel files: The Apache POI library (which we use underneath) has a good API for writing to Excel files and provides the `SXSSFWorkbook` for writing large files in an efficient manner.
 
 ## Usage
 
@@ -37,7 +35,7 @@ First things first, add the following dependency to your `pom.xml`
 <dependency>
     <groupId>com.creditdatamw.labs</groupId>
     <artifactId>zerocell-core</artifactId>
-    <version>0.3.0</version>
+    <version>0.3.2</version>
 </dependency>
 ```
 
@@ -144,7 +142,7 @@ annotation processor which generates the classes:
 <dependency>
     <groupId>com.creditdatamw.labs</groupId>
     <artifactId>zerocell-processor</artifactId>
-    <version>0.3.0</version>
+    <version>0.3.2</version>
     <scope>provided</scope>
 </dependency>
 ```
@@ -206,4 +204,4 @@ See the [`CONTRIBUTING.md`](CONTRIBUTING.md) file for more information.
 
 ---
 
-Copyright (c) 2018, Credit Data CRB Ltd
+Copyright (c) Credit Data CRB Ltd
