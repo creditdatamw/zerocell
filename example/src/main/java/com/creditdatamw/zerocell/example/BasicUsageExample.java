@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class BasicUsageExample {
     /**
-     * Main method
+     * MainEntity method
      *
      * @param args
      * @throws ZeroCellException

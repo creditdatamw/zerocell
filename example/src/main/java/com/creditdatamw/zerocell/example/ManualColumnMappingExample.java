@@ -19,7 +19,7 @@ import java.util.List;
  */
 public class ManualColumnMappingExample {
     /**
-     * Main method
+     * MainEntity method
      *
      * @param args
      * @throws ZeroCellException

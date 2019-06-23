@@ -35,5 +35,5 @@ public @interface Column {
      *
      * @return Converter to use to convert the string value to the field type's value
      */
-    Class<?> convertorClass() default NoopConverter.class;
+    Class<?> converterClass() default NoopConverter.class;
 }
