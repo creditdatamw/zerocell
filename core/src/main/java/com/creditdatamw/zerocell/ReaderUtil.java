@@ -30,7 +30,7 @@ public final class ReaderUtil {
      */
     public static void process(File file, String sheetName, ZeroCellReader reader) {
         try (FileInputStream fis = new FileInputStream(file)) {
-            process(fis, sheetName, reader);
+            process(fis, sheetName, reader, file.getAbsolutePath());
         } catch (IOException ioe) {
             throw new ZeroCellException("Failed to process file", ioe);
         }
@@ -43,14 +43,16 @@ public final class ReaderUtil {
      * @param sheetName The sheet to extract from in the workbook
      * @param reader The reader class to use to load the file from the sheet
      */
-    public static void process(InputStream is, String sheetName, ZeroCellReader reader) {
-        try (PushbackInputStream p = new PushbackInputStream(is, 16);
-             OPCPackage opcPackage = OPCPackage.open(p)) {
+    public static void process(InputStream is, String sheetName, ZeroCellReader reader, String path) {
+        try (PushbackInputStream ignored = new PushbackInputStream(is, 16);
+//             OPCPackage opcPackage = OPCPackage.open(p)) {
+             OPCPackage opcPackage = OPCPackage.open(path)) {
 
             DataFormatter dataFormatter = new DataFormatter();
             ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(opcPackage);
             XSSFReader xssfReader = new XSSFReader(opcPackage);
             StylesTable stylesTable = xssfReader.getStylesTable();
+//            StylesTable stylesTable = null;
             InputStream sheetInputStream = null;
             XSSFReader.SheetIterator sheets = (XSSFReader.SheetIterator) xssfReader.getSheetsData();
             while (sheets.hasNext()) {

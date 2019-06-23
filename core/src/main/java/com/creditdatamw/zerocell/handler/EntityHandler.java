@@ -84,8 +84,8 @@ public class EntityHandler<T> {
         }
         final ColumnInfo rowNumberColumn = columnMapping.getRowNumberInfo();
         final List<ColumnInfo> list = columnMapping.getColumns();
-        final ColumnInfo[] columns = new ColumnInfo[list.size()];
-        int index = 0;
+        /*final ColumnInfo[] columns = new ColumnInfo[list.size()];
+        int index;
         for(ColumnInfo columnInfo: list) {
             index = columnInfo.getIndex();
             if (index > columns.length - 1) {
@@ -97,8 +97,8 @@ public class EntityHandler<T> {
                 throw new ZeroCellException("Cannot map two columns to the same index: " + index);
             }
             columns[index] = columnInfo;
-        }
-        return new EntityExcelSheetHandler(rowNumberColumn, columns);
+        }*/
+        return new EntityExcelSheetHandler(rowNumberColumn, list);
     }
 
     private ColumnMapping readColumnInfoViaReflection(Class<?> clazz) {
@@ -116,7 +116,7 @@ public class EntityHandler<T> {
 
             Column annotation = field.getAnnotation(Column.class);
             if (! Objects.isNull(annotation)) {
-                Class<?> converter = annotation.convertorClass();
+                Class<?> converter = annotation.converterClass();
                 list.add(new ColumnInfo(annotation.name().trim(),
                         field.getName(),
                         annotation.index(),
@@ -150,10 +150,10 @@ public class EntityHandler<T> {
         private final Logger LOGGER = LoggerFactory.getLogger(EntityExcelSheetHandler.class);
 
         private final ColumnInfo rowNumberColumn;
-        private final ColumnInfo[] columns;
+        private final List<ColumnInfo> columns;
         private final List<T> entities;
         private final Converter NOOP_CONVERTER = new NoopConverter();
-        private final Converter[] converters;
+//        private final Converter[] converters;
         private final int MAXIMUM_COL_INDEX;
 
         private boolean isHeaderRow = false;
@@ -161,16 +161,16 @@ public class EntityHandler<T> {
         private int currentCol = -1;
         private T cur;
 
-        EntityExcelSheetHandler(ColumnInfo rowNumberColumn, ColumnInfo[] columns) {
+        EntityExcelSheetHandler(ColumnInfo rowNumberColumn, List<ColumnInfo> columns) {
             this.rowNumberColumn = rowNumberColumn;
             this.columns = columns;
-            this.converters = cacheConverters();
+//            this.converters = cacheConverters();
             this.entities = new ArrayList<>();
-            this.MAXIMUM_COL_INDEX = columns.length - 1;
+            this.MAXIMUM_COL_INDEX = columns.size() - 1;
         }
 
         private Converter[] cacheConverters() {
-            Converter[] cv = new Converter[columns.length];
+            Converter[] cv = new Converter[columns.size()];
             for (ColumnInfo c: columns) {
                 cv[c.getIndex()] = NOOP_CONVERTER;
                 try {
@@ -249,7 +249,7 @@ public class EntityHandler<T> {
                 return;
             }
 
-            ColumnInfo currentColumnInfo = columns[column];
+            ColumnInfo currentColumnInfo = columns.get(column);
 
             if (isHeaderRow && !skipHeaderRow) {
                 if (! currentColumnInfo.getName().equalsIgnoreCase(formattedValue.trim())){
@@ -273,9 +273,9 @@ public class EntityHandler<T> {
             String fieldName = currentColumnInfo.getFieldName();
             try {
                 Converter converter = NOOP_CONVERTER;
-                if (currentColumnInfo.getIndex() != -1 && currentColumnInfo.getIndex() < columns.length) {
+                /*if (currentColumnInfo.getIndex() != -1 && currentColumnInfo.getIndex() < columns.length) {
                     converter = converters[currentColumnInfo.getIndex()];
-                }
+                }*/
                 Object value = null;
                 // Don't use a converter if there isn't a custom one
                 if (converter instanceof NoopConverter) {
