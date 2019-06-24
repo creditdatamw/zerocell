@@ -101,13 +101,16 @@ public class EntityHandler<T> {
         return new EntityExcelSheetHandler(rowNumberColumn, infoMap);
     }
 
-    private void preventIndexesDuplicates(List<ColumnInfo> columnInfos) {
-
-    }
-
     private Map<Integer, ColumnInfo> initColumnInfosMap(List<ColumnInfo> columnInfos) {
         Map<Integer, ColumnInfo> map = new HashMap<>();
-        columnInfos.forEach(info -> map.put(info.getIndex(), info));
+        columnInfos.forEach(info -> {
+            int index = info.getIndex();
+            if (Objects.isNull(map.get(index))) {
+                map.put(index, info);
+            } else {
+                throw new ZeroCellException("Cannot map two columns to the same index: " + index);
+            }
+        });
         return map;
     }
 
