@@ -21,10 +21,7 @@ import java.lang.reflect.Field;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static com.creditdatamw.zerocell.column.ColumnMapping.parseColumnMappingFromAnnotations;
 
@@ -41,7 +38,7 @@ public class EntityHandler<T> {
 
     public EntityHandler(Class<T> clazz, boolean skipHeaderRow, int skipFirstNRows) {
         Objects.requireNonNull(clazz);
-        assert(skipFirstNRows >= 0);
+        assert (skipFirstNRows >= 0);
         this.type = clazz;
         this.sheetName = DEFAULT_SHEET;
         this.entitySheetHandler = createSheetHandler(clazz, null);
@@ -51,7 +48,7 @@ public class EntityHandler<T> {
 
     public EntityHandler(Class<T> clazz, String sheetName, boolean skipHeaderRow, int skipFirstNRows) {
         Objects.requireNonNull(clazz);
-        assert(skipFirstNRows >= 0);
+        assert (skipFirstNRows >= 0);
         this.type = clazz;
         this.sheetName = sheetName;
         this.entitySheetHandler = createSheetHandler(clazz, null);
@@ -61,7 +58,7 @@ public class EntityHandler<T> {
 
     public EntityHandler(Class<T> clazz, ColumnMapping columnMapping, boolean skipHeaderRow, int skipFirstNRows) {
         Objects.requireNonNull(clazz);
-        assert(skipFirstNRows >= 0);
+        assert (skipFirstNRows >= 0);
         this.type = clazz;
         this.sheetName = DEFAULT_SHEET;
         this.entitySheetHandler = createSheetHandler(clazz, columnMapping);
@@ -71,7 +68,7 @@ public class EntityHandler<T> {
 
     public EntityHandler(Class<T> clazz, String sheetName, ColumnMapping columnMapping, boolean skipHeaderRow, int skipFirstNRows) {
         Objects.requireNonNull(clazz);
-        assert(skipFirstNRows >= 0);
+        assert (skipFirstNRows >= 0);
         this.type = clazz;
         this.sheetName = sheetName;
         this.entitySheetHandler = createSheetHandler(clazz, columnMapping);
@@ -101,25 +98,39 @@ public class EntityHandler<T> {
             columnMapping = parseColumnMappingFromAnnotations(clazz);
         }
         final ColumnInfo rowNumberColumn = columnMapping.getRowNumberInfo();
-        final List<ColumnInfo> list = columnMapping.getColumns();
-        return new EntityExcelSheetHandler( rowNumberColumn, list);
+
+        final List<ColumnInfo> columnInfos = columnMapping.getColumns();
+        Map<Integer, ColumnInfo> infoMap = initColumnInfosMap(columnInfos);
+
+        return new EntityExcelSheetHandler(rowNumberColumn, infoMap);
     }
+
+    private void preventIndexesDuplicates(List<ColumnInfo> columnInfos) {
+
+    }
+
+    private Map<Integer, ColumnInfo> initColumnInfosMap(List<ColumnInfo> columnInfos) {
+        Map<Integer, ColumnInfo> map = new HashMap<>();
+        columnInfos.forEach(info -> map.put(info.getIndex(), info));
+        return map;
+    }
+
 
     private ColumnMapping readColumnInfoViaReflection(Class<?> clazz) {
         Field[] fieldArray = clazz.getDeclaredFields();
         ArrayList<ColumnInfo> list = new ArrayList<>(fieldArray.length);
         ColumnInfo rowNumberColumn = null;
-        for (Field field: fieldArray) {
+        for (Field field : fieldArray) {
 
             RowNumber rowNumberAnnotation = field.getAnnotation(RowNumber.class);
 
-            if (! Objects.isNull(rowNumberAnnotation)) {
-                rowNumberColumn = new ColumnInfo("__id__", field.getName(), -1, null,Integer.class, NoopConverter.class);
+            if (!Objects.isNull(rowNumberAnnotation)) {
+                rowNumberColumn = new ColumnInfo("__id__", field.getName(), -1, null, Integer.class, NoopConverter.class);
                 continue;
             }
 
             Column annotation = field.getAnnotation(Column.class);
-            if (! Objects.isNull(annotation)) {
+            if (!Objects.isNull(annotation)) {
                 Class<?> converter = annotation.converterClass();
                 list.add(new ColumnInfo(annotation.name().trim(),
                         field.getName(),
@@ -139,6 +150,7 @@ public class EntityHandler<T> {
 
     /**
      * Returns the extracted entities as an immutable list.
+     *
      * @return an immutable list of the extracted entities
      */
     public List<T> readAsList() {
@@ -158,35 +170,33 @@ public class EntityHandler<T> {
         private final Logger LOGGER = LoggerFactory.getLogger(EntityExcelSheetHandler.class);
 
         private final ColumnInfo rowNumberColumn;
-        private final List<ColumnInfo> columns;
+        private final Map<Integer, ColumnInfo> columns;
         private final List<T> entities;
         private final Converter NOOP_CONVERTER = new NoopConverter();
         private final Converter[] converters;
-        private final int MAXIMUM_COL_INDEX;
-
         private boolean isHeaderRow = false;
         private int currentRow = -1;
         private int currentCol = -1;
         private T cur;
 
-        EntityExcelSheetHandler(ColumnInfo rowNumberColumn, List<ColumnInfo> columns) {
+        EntityExcelSheetHandler(ColumnInfo rowNumberColumn, Map<Integer, ColumnInfo> columns) {
             this.rowNumberColumn = rowNumberColumn;
             this.columns = columns;
             this.converters = cacheConverters();
             this.entities = new ArrayList<>();
-            this.MAXIMUM_COL_INDEX = columns.size() - 1;
         }
 
         private Converter[] cacheConverters() {
+            //TODO: use not arrays, but another collection
             Converter[] cv = new Converter[columns.size()];
-            for (ColumnInfo c: columns) {
-                cv[c.getIndex()] = NOOP_CONVERTER;
+            for (ColumnInfo columnInfo : columns.values()) {
+                cv[columnInfo.getIndex()] = NOOP_CONVERTER;
                 try {
-                    if (!c.getConverterClass().equals(NoopConverter.class)) {
-                        cv[c.getIndex()] = (Converter) c.getConverterClass().newInstance();
+                    if (!columnInfo.getConverterClass().equals(NoopConverter.class)) {
+                        cv[columnInfo.getIndex()] = (Converter) columnInfo.getConverterClass().newInstance();
                     }
                 } catch (InstantiationException | IllegalAccessException e) {
-                    LOGGER.error("Failed to instantiate Converter class: {}", c.getConverterClass());
+                    LOGGER.error("Failed to instantiate Converter class: {}", columnInfo.getConverterClass());
                 }
             }
             return cv;
@@ -224,7 +234,7 @@ public class EntityHandler<T> {
             try {
                 cur = (T) type.newInstance();
                 // Write to the field with the @RowNumber annotation here if it exists
-                if (! Objects.isNull(rowNumberColumn)) {
+                if (!Objects.isNull(rowNumberColumn)) {
                     writeColumnField(cur, String.valueOf(currentRow), rowNumberColumn, currentRow);
                 }
             } catch (InstantiationException | IllegalAccessException e) {
@@ -234,7 +244,7 @@ public class EntityHandler<T> {
 
         @Override
         public void endRow(int i) {
-            if (! Objects.isNull(cur)) {
+            if (!Objects.isNull(cur)) {
                 this.entities.add(cur);
                 cur = null;
             }
@@ -242,25 +252,18 @@ public class EntityHandler<T> {
 
         @Override
         public void cell(String cellReference, String formattedValue, XSSFComment xssfComment) {
-            // gracefully handle missing CellRef here in a similar way as XSSFCell does
-            if(cellReference == null) {
+            if (cellReference == null) {
                 cellReference = new CellAddress(currentRow, currentCol).formatAsString();
             }
-
+            //TODO: Check the count of columns
             int column = new CellReference(cellReference).getCol();
             currentCol = column;
 
-            // We ignore additional cells here since we only care about the cells
-            // in the columns array i.e. the defined columns
-            if (column > MAXIMUM_COL_INDEX) {
-                LOGGER.trace("Invalid Column index found: " + column);
-                return;
-            }
-
             ColumnInfo currentColumnInfo = columns.get(column);
-
+            if (currentColumnInfo == null)
+                return;
             if (isHeaderRow && !skipHeaderRow) {
-                if (! currentColumnInfo.getName().equalsIgnoreCase(formattedValue.trim())){
+                if (!currentColumnInfo.getName().equalsIgnoreCase(formattedValue.trim())) {
                     throw new ZeroCellException(String.format("Expected Column '%s' but found '%s'", currentColumnInfo.getName(), formattedValue));
                 }
             }
@@ -272,10 +275,10 @@ public class EntityHandler<T> {
         /**
          * Write the value read from the excel cell to a field
          *
-         * @param object the object to write to
-         * @param formattedValue the value read from the current excel column/row
+         * @param object            the object to write to
+         * @param formattedValue    the value read from the current excel column/row
          * @param currentColumnInfo Column metadata
-         * @param rowNum the row number
+         * @param rowNum            the row number
          */
         private void writeColumnField(T object, String formattedValue, ColumnInfo currentColumnInfo, int rowNum) {
             String fieldName = currentColumnInfo.getFieldName();
@@ -292,13 +295,13 @@ public class EntityHandler<T> {
                     // Handle any exceptions thrown by the converter - this stops execution of the whole process
                     try {
                         value = converter.convert(formattedValue, currentColumnInfo.getName(), rowNum);
-                    } catch(Exception e) {
+                    } catch (Exception e) {
                         throw new ZeroCellException(String.format("%s threw an exception while trying to convert value %s ", converter.getClass().getName(), formattedValue), e);
                     }
                 }
                 Field field = type.getDeclaredField(currentColumnInfo.getFieldName());
                 boolean access = field.isAccessible();
-                if (! access) {
+                if (!access) {
                     field.setAccessible(true);
                 }
                 field.set(cur, value);
