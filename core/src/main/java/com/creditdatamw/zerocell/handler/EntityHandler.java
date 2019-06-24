@@ -101,11 +101,15 @@ public class EntityHandler<T> {
 
         final List<ColumnInfo> columnInfos = columnMapping.getColumns();
         Map<Integer, ColumnInfo> infoMap = initColumnInfosMap(columnInfos);
-
         return new EntityExcelSheetHandler(rowNumberColumn, infoMap);
     }
 
-    private Map<Integer, ColumnInfo> initColumnInfosMap(List<ColumnInfo> columnInfos) {
+    /**
+     * Create th map, where key is the index from @Column annotation,
+     * and value is the ColumnInfo.
+     * The method also checks the indexes duplicates and throws a ZeroCellException in this case
+     */
+    private Map<Integer, ColumnInfo> initColumnInfosMap(List<ColumnInfo> columnInfos) throws ZeroCellException {
         Map<Integer, ColumnInfo> map = new HashMap<>();
         columnInfos.forEach(info -> {
             int index = info.getIndex();
@@ -176,7 +180,7 @@ public class EntityHandler<T> {
         private final Map<Integer, ColumnInfo> columns;
         private final List<T> entities;
         private final Converter NOOP_CONVERTER = new NoopConverter();
-        private final Converter[] converters;
+        private final Map<Integer, Converter> converters;
         private boolean isHeaderRow = false;
         private int currentRow = -1;
         private int currentCol = -1;
@@ -189,20 +193,19 @@ public class EntityHandler<T> {
             this.entities = new ArrayList<>();
         }
 
-        private Converter[] cacheConverters() {
-            //TODO: use not arrays, but another collection
-            Converter[] cv = new Converter[columns.size()];
+        private Map<Integer, Converter> cacheConverters() {
+            Map<Integer, Converter> mappedConverters = new HashMap<>();
             for (ColumnInfo columnInfo : columns.values()) {
-                cv[columnInfo.getIndex()] = NOOP_CONVERTER;
+                mappedConverters.put(columnInfo.getIndex(), NOOP_CONVERTER);
                 try {
                     if (!columnInfo.getConverterClass().equals(NoopConverter.class)) {
-                        cv[columnInfo.getIndex()] = (Converter) columnInfo.getConverterClass().newInstance();
+                        mappedConverters.put(columnInfo.getIndex(), (Converter) columnInfo.getConverterClass().newInstance());
                     }
                 } catch (InstantiationException | IllegalAccessException e) {
                     LOGGER.error("Failed to instantiate Converter class: {}", columnInfo.getConverterClass());
                 }
             }
-            return cv;
+            return mappedConverters;
         }
 
         @Override
@@ -258,13 +261,14 @@ public class EntityHandler<T> {
             if (cellReference == null) {
                 cellReference = new CellAddress(currentRow, currentCol).formatAsString();
             }
-            //TODO: Check the count of columns
             int column = new CellReference(cellReference).getCol();
             currentCol = column;
 
             ColumnInfo currentColumnInfo = columns.get(column);
-            if (currentColumnInfo == null)
+            if (Objects.isNull(currentColumnInfo)) {
                 return;
+            }
+
             if (isHeaderRow && !skipHeaderRow) {
                 if (!currentColumnInfo.getName().equalsIgnoreCase(formattedValue.trim())) {
                     throw new ZeroCellException(String.format("Expected Column '%s' but found '%s'", currentColumnInfo.getName(), formattedValue));
@@ -287,9 +291,9 @@ public class EntityHandler<T> {
             String fieldName = currentColumnInfo.getFieldName();
             try {
                 Converter converter = NOOP_CONVERTER;
-                /*if (currentColumnInfo.getIndex() != -1 && currentColumnInfo.getIndex() < columns.length) {
-                    converter = converters[currentColumnInfo.getIndex()];
-                }*/
+                if (currentColumnInfo.getIndex() != -1) {
+                    converter = converters.get(currentColumnInfo.getIndex());
+                }
                 Object value = null;
                 // Don't use a converter if there isn't a custom one
                 if (converter instanceof NoopConverter) {
