@@ -33,8 +33,9 @@ public class EntityHandler<T> {
     private final String sheetName;
     private final boolean skipHeaderRow;
     private final int skipFirstNRows;
+    private final int maxRowNumber;
 
-    public EntityHandler(Class<T> clazz, boolean skipHeaderRow, int skipFirstNRows) {
+    public EntityHandler(Class<T> clazz, boolean skipHeaderRow, int skipFirstNRows, int maxRowNumber) {
         Objects.requireNonNull(clazz);
         assert (skipFirstNRows >= 0);
         this.type = clazz;
@@ -42,9 +43,10 @@ public class EntityHandler<T> {
         this.entitySheetHandler = createSheetHandler(clazz, null);
         this.skipHeaderRow = skipHeaderRow;
         this.skipFirstNRows = skipFirstNRows;
+        this.maxRowNumber = maxRowNumber;
     }
 
-    public EntityHandler(Class<T> clazz, String sheetName, boolean skipHeaderRow, int skipFirstNRows) {
+    public EntityHandler(Class<T> clazz, String sheetName, boolean skipHeaderRow, int skipFirstNRows, int maxRowNumber) {
         Objects.requireNonNull(clazz);
         assert (skipFirstNRows >= 0);
         this.type = clazz;
@@ -52,9 +54,10 @@ public class EntityHandler<T> {
         this.entitySheetHandler = createSheetHandler(clazz, null);
         this.skipHeaderRow = skipHeaderRow;
         this.skipFirstNRows = skipFirstNRows;
+        this.maxRowNumber = maxRowNumber;
     }
 
-    public EntityHandler(Class<T> clazz, ColumnMapping columnMapping, boolean skipHeaderRow, int skipFirstNRows) {
+    public EntityHandler(Class<T> clazz, ColumnMapping columnMapping, boolean skipHeaderRow, int skipFirstNRows, int maxRowNumber) {
         Objects.requireNonNull(clazz);
         assert (skipFirstNRows >= 0);
         this.type = clazz;
@@ -62,9 +65,10 @@ public class EntityHandler<T> {
         this.entitySheetHandler = createSheetHandler(clazz, columnMapping);
         this.skipHeaderRow = skipHeaderRow;
         this.skipFirstNRows = skipFirstNRows;
+        this.maxRowNumber = maxRowNumber;
     }
 
-    public EntityHandler(Class<T> clazz, String sheetName, ColumnMapping columnMapping, boolean skipHeaderRow, int skipFirstNRows) {
+    public EntityHandler(Class<T> clazz, String sheetName, ColumnMapping columnMapping, boolean skipHeaderRow, int skipFirstNRows, int maxRowNumber) {
         Objects.requireNonNull(clazz);
         assert (skipFirstNRows >= 0);
         this.type = clazz;
@@ -72,6 +76,11 @@ public class EntityHandler<T> {
         this.entitySheetHandler = createSheetHandler(clazz, columnMapping);
         this.skipHeaderRow = skipHeaderRow;
         this.skipFirstNRows = skipFirstNRows;
+        this.maxRowNumber = maxRowNumber;
+    }
+
+    private boolean isRowNumberValueSetted() {
+        return this.maxRowNumber != 0 && this.maxRowNumber != this.skipFirstNRows;
     }
 
     @SuppressWarnings("unchecked")
@@ -228,6 +237,10 @@ public class EntityHandler<T> {
 
         @Override
         public void endRow(int i) {
+            if (isRowNumberValueSetted() && i > maxRowNumber) {
+                return;
+            }
+
             if (!Objects.isNull(cur)) {
                 this.entities.add(cur);
                 cur = null;
