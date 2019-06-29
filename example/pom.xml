@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>zerocell-parent</artifactId>
-        <groupId>com.creditdatamw.labz</groupId>
+        <groupId>com.creditdatamw.labs</groupId>
         <version>0.3.3-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
@@ -13,12 +13,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.creditdatamw.labz</groupId>
+            <groupId>com.creditdatamw.labs</groupId>
             <artifactId>zerocell-core</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>com.creditdatamw.labz</groupId>
+            <groupId>com.creditdatamw.labs</groupId>
             <artifactId>zerocell-processor</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>
