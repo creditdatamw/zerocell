@@ -16,7 +16,7 @@ public class TestHandler {
     public void testFS701MissingColumnIssue() {
         // A row class with an index skipped must not be allowed
         thrown.expect(ZeroCellException.class);
-        thrown.expectMessage("Column index out of range. index=3 columnCount=3. Ensure there @Column annotations for all indexes from 0 to 2");
+        thrown.expectMessage(String.format("Expected Column '%s' but found '%s'", "First", "ID"));
         Reader.of(Row.class)
                 .from(new File("src/test/resources/test_people.xlsx"))
                 .sheet("uploads")
