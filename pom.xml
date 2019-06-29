@@ -4,7 +4,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.creditdatamw.labz</groupId>
+	<groupId>com.creditdatamw.labs</groupId>
     <artifactId>zerocell-parent</artifactId>
     <version>0.3.3-SNAPSHOT</version>
     <packaging>pom</packaging>
