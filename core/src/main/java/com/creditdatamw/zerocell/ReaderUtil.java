@@ -4,6 +4,7 @@ import org.apache.poi.EmptyFileException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.ss.usermodel.DataFormatter;
 import org.apache.poi.util.SAXHelper;
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
@@ -21,6 +22,32 @@ import java.util.Objects;
  *
  */
 public final class ReaderUtil {
+    public static final String ERROR_NOT_OPENXML = "Cannot load file. The file must be an Excel 2007+ Workbook (.xlsx)";
+    /**
+     * Reads a list of POJOs from the given excel file.
+     *
+     * @param path Excel file to read from
+     * @param sheetName The sheet to extract from in the workbook
+     * @param reader The reader class to use to load the file from the sheet
+     */
+    public static void process(String path, String sheetName, ZeroCellReader reader) {
+        if (path == null || path.trim().isEmpty()) {
+            throw new IllegalArgumentException("'path' must be given");
+        }
+
+        File file = new File(path);
+        if (file.exists() && file.isDirectory()) {
+            throw new IllegalArgumentException("path must not be a directory");
+        }
+        try (OPCPackage opcPackage = OPCPackage.open(file.getAbsolutePath(), PackageAccess.READ)) {
+            process(opcPackage, sheetName, reader);
+        } catch(InvalidFormatException | NotOfficeXmlFileException ife) {
+            throw new ZeroCellException(ERROR_NOT_OPENXML);
+        } catch (IOException ioe) {
+            throw new ZeroCellException("Failed to process file", ioe);
+        }
+    }
+
     /**
      * Reads a list of POJOs from the given excel file.
      *
@@ -29,8 +56,10 @@ public final class ReaderUtil {
      * @param reader The reader class to use to load the file from the sheet
      */
     public static void process(File file, String sheetName, ZeroCellReader reader) {
-        try (FileInputStream fis = new FileInputStream(file)) {
-            process(fis, sheetName, reader);
+        try (OPCPackage opcPackage = OPCPackage.open(file, PackageAccess.READ)) {
+            process(opcPackage, sheetName, reader);
+        } catch(InvalidFormatException | NotOfficeXmlFileException ife) {
+            throw new ZeroCellException(ERROR_NOT_OPENXML);
         } catch (IOException ioe) {
             throw new ZeroCellException("Failed to process file", ioe);
         }
@@ -46,7 +75,14 @@ public final class ReaderUtil {
     public static void process(InputStream is, String sheetName, ZeroCellReader reader) {
         try (PushbackInputStream p = new PushbackInputStream(is, 16);
              OPCPackage opcPackage = OPCPackage.open(p)) {
+            process(opcPackage, sheetName, reader);
+        } catch (Exception e) {
+            throw new ZeroCellException("Failed to process file", e);
+        }
+    }
 
+    private static void process(OPCPackage opcPackage, String sheetName, ZeroCellReader reader) {
+        try {
             DataFormatter dataFormatter = new DataFormatter();
             ReadOnlySharedStringsTable strings = new ReadOnlySharedStringsTable(opcPackage);
             XSSFReader xssfReader = new XSSFReader(opcPackage);
@@ -76,7 +112,7 @@ public final class ReaderUtil {
             strings = null;
             xssfReader = null;
         } catch(InvalidFormatException | EmptyFileException | NotOfficeXmlFileException ife) {
-            throw new ZeroCellException("Cannot load file. The file must be an Excel 2007+ Workbook (.xlsx)");
+            throw new ZeroCellException(ERROR_NOT_OPENXML);
         } catch(SheetNotFoundException ex) {
             throw new ZeroCellException(ex.getMessage());
         } catch (ZeroCellException ze) {
