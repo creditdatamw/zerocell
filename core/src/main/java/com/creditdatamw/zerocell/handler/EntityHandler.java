@@ -77,6 +77,22 @@ public class EntityHandler<T> {
         this.skipFirstNRows = skipFirstNRows;
     }
 
+    public String getSheetName() {
+        return sheetName;
+    }
+
+    public EntityExcelSheetHandler<T> getEntitySheetHandler() {
+        return entitySheetHandler;
+    }
+
+    public boolean isSkipHeaderRow() {
+        return skipHeaderRow;
+    }
+
+    public int getSkipFirstNRows() {
+        return skipFirstNRows;
+    }
+
     @SuppressWarnings("unchecked")
     private EntityExcelSheetHandler<T> createSheetHandler(Class<T> clazz, ColumnMapping columnMapping) {
         if (columnMapping == null) {
