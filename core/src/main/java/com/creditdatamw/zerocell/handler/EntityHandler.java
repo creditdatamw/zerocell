@@ -2,20 +2,17 @@ package com.creditdatamw.zerocell.handler;
 
 import com.creditdatamw.zerocell.ReaderUtil;
 import com.creditdatamw.zerocell.ZeroCellException;
-import com.creditdatamw.zerocell.annotation.Column;
-import com.creditdatamw.zerocell.annotation.RowNumber;
 import com.creditdatamw.zerocell.column.ColumnInfo;
 import com.creditdatamw.zerocell.column.ColumnMapping;
-import com.creditdatamw.zerocell.converter.NoopConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+
+import static com.creditdatamw.zerocell.column.ColumnMapping.parseColumnMappingFromAnnotations;
 
 public class EntityHandler<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityHandler.class);
@@ -87,7 +84,7 @@ public class EntityHandler<T> {
     @SuppressWarnings("unchecked")
     private EntityExcelSheetHandler<T> createSheetHandler(Class<T> clazz, ColumnMapping columnMapping) {
         if (columnMapping == null) {
-            columnMapping = readColumnInfoViaReflection(clazz);
+            columnMapping = parseColumnMappingFromAnnotations(clazz);
         }
         final ColumnInfo rowNumberColumn = columnMapping.getRowNumberInfo();
         final List<ColumnInfo> list = columnMapping.getColumns();
@@ -106,38 +103,6 @@ public class EntityHandler<T> {
             columns[index] = columnInfo;
         }
         return new EntityExcelSheetHandler(this, rowNumberColumn, columns);
-    }
-
-    private ColumnMapping readColumnInfoViaReflection(Class<?> clazz) {
-        Field[] fieldArray = clazz.getDeclaredFields();
-        ArrayList<ColumnInfo> list = new ArrayList<>(fieldArray.length);
-        ColumnInfo rowNumberColumn = null;
-        for (Field field: fieldArray) {
-
-            RowNumber rowNumberAnnotation = field.getAnnotation(RowNumber.class);
-
-            if (! Objects.isNull(rowNumberAnnotation)) {
-                rowNumberColumn = new ColumnInfo("__id__", field.getName(), -1, null,Integer.class, NoopConverter.class);
-                continue;
-            }
-
-            Column annotation = field.getAnnotation(Column.class);
-            if (! Objects.isNull(annotation)) {
-                Class<?> converter = annotation.convertorClass();
-                list.add(new ColumnInfo(annotation.name().trim(),
-                        field.getName(),
-                        annotation.index(),
-                        annotation.dataFormat(),
-                        field.getType(),
-                        converter));
-            }
-        }
-
-        if (list.isEmpty()) {
-            throw new ZeroCellException(String.format("Class %s does not have @Column annotations", clazz.getName()));
-        }
-        list.trimToSize();
-        return new ColumnMapping(rowNumberColumn, list);
     }
 
     /**
