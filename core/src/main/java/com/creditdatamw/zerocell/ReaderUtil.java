@@ -41,7 +41,7 @@ public final class ReaderUtil {
         }
         try (OPCPackage opcPackage = OPCPackage.open(file.getAbsolutePath(), PackageAccess.READ)) {
             process(opcPackage, sheetName, reader);
-        } catch(InvalidFormatException | NotOfficeXmlFileException ife) {
+        } catch(InvalidFormatException | EmptyFileException | NotOfficeXmlFileException ife) {
             throw new ZeroCellException(ERROR_NOT_OPENXML);
         } catch (IOException ioe) {
             throw new ZeroCellException("Failed to process file", ioe);
@@ -58,7 +58,7 @@ public final class ReaderUtil {
     public static void process(File file, String sheetName, ZeroCellReader reader) {
         try (OPCPackage opcPackage = OPCPackage.open(file, PackageAccess.READ)) {
             process(opcPackage, sheetName, reader);
-        } catch(InvalidFormatException | NotOfficeXmlFileException ife) {
+        } catch(InvalidFormatException | EmptyFileException | NotOfficeXmlFileException ife) {
             throw new ZeroCellException(ERROR_NOT_OPENXML);
         } catch (IOException ioe) {
             throw new ZeroCellException("Failed to process file", ioe);
