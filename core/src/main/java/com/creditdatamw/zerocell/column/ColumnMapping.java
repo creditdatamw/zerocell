@@ -56,7 +56,7 @@ public final class ColumnMapping {
 
             Column annotation = field.getAnnotation(Column.class);
             if (! Objects.isNull(annotation)) {
-                Class<?> converter = annotation.convertorClass();
+                Class<?> converter = annotation.converterClass();
                 list.add(new ColumnInfo(annotation.name().trim(),
                         field.getName(),
                         annotation.index(),
