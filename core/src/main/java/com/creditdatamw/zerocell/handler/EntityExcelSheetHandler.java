@@ -5,7 +5,6 @@ import com.creditdatamw.zerocell.ZeroCellException;
 import com.creditdatamw.zerocell.ZeroCellReader;
 import com.creditdatamw.zerocell.column.ColumnInfo;
 import com.creditdatamw.zerocell.converter.Converter;
-import com.creditdatamw.zerocell.converter.Converters;
 import com.creditdatamw.zerocell.converter.NoopConverter;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
@@ -15,10 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.lang.reflect.Field;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
+
+import static com.creditdatamw.zerocell.converter.ConverterUtils.convertValueToType;
 
 final class EntityExcelSheetHandler<T> implements ZeroCellReader {
     private EntityHandler<T> entityHandler;
@@ -177,40 +175,6 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
         } catch (NoSuchFieldException | IllegalAccessException e) {
             LOGGER.error("Failed to set field: {}", fieldName, e);
         }
-    }
-
-    public Object convertValueToType(Class<?> fieldType, String formattedValue, String columnName, int rowNum) {
-        Object value = null;
-        if (fieldType == String.class) {
-            value = String.valueOf(formattedValue);
-        } else if (fieldType == LocalDateTime.class) {
-            return Converters.toLocalDateTime.convert(formattedValue, columnName, rowNum);
-
-        } else if (fieldType == LocalDate.class) {
-            return Converters.toLocalDate.convert(formattedValue, columnName, rowNum);
-
-        } else if (fieldType == java.sql.Date.class) {
-            return Converters.toSqlDate.convert(formattedValue, columnName, rowNum);
-
-        } else if (fieldType == Timestamp.class) {
-            return Converters.toSqlTimestamp.convert(formattedValue, columnName, rowNum);
-
-        } else if (fieldType == Integer.class || fieldType == int.class) {
-            return Converters.toInteger.convert(formattedValue, columnName, rowNum);
-
-        } else if (fieldType == Long.class || fieldType == long.class) {
-            return Converters.toLong.convert(formattedValue, columnName, rowNum);
-
-        } else if (fieldType == Double.class || fieldType == double.class) {
-            return Converters.toDouble.convert(formattedValue, columnName, rowNum);
-
-        } else if (fieldType == Float.class || fieldType == float.class) {
-            return Converters.toFloat.convert(formattedValue, columnName, rowNum);
-
-        } else if (fieldType == Boolean.class) {
-            return Converters.toBoolean.convert(formattedValue, columnName, rowNum);
-        }
-        return value;
     }
 
     @Override
