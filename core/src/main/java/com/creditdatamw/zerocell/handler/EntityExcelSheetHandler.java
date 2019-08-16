@@ -55,9 +55,16 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
         return mappedConverters;
     }
 
+    /**
+     * Returns a list of entities loaded from the provided Excel file
+     * @param file the Excel file to load data from
+     * @param sheet the sheet to load data from
+     * @return list of entities from the sheet
+     */
     @Override
     public List<T> read(File file, String sheet) {
-        /** We don't need to process the file here since that's
+        /**
+         * We don't need to process the file here since that's
          * handled in {@link ReaderUtil} which MUST be used when using this class
          */
         return Collections.unmodifiableList(this.entities);

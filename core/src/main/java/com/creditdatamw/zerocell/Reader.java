@@ -12,7 +12,7 @@ import java.util.Objects;
 /**
  * Main API for ZeroCell
  */
-public class Reader {
+public class Reader<T> {
 
     public static <T> String[] columnsOf(Class<T> clazz) {
         return ColumnInfo.columnsOf(clazz);
@@ -66,7 +66,7 @@ public class Reader {
          * Set the number of rows to skip before the header
          *
          * @param value is the number of rows to skip
-         * @return ReaderBuilder<T>
+         * @return ReaderBuilder
          */
         public ReaderBuilder<T> skipFirstNRows(int value) {
             assert (value > 0);
@@ -79,7 +79,7 @@ public class Reader {
          * Set the maximum number of rows to parse.
          *
          * @param rowNumber the number of rows to parse.
-         * @return ReaderBuilder<T>
+         * @return ReaderBuilder
          */
         public ReaderBuilder<T> setRowNumber(int rowNumber) {
             assert (rowNumber > 0);
@@ -87,6 +87,7 @@ public class Reader {
             return this;
         }
 
+        @SuppressWarnings("unchecked")
         public <T> List<T> list() {
             EntityHandler<T> entityHandler;
             if (!Objects.isNull(sheetName) && !Objects.isNull(columnMapping)) {

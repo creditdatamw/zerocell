@@ -2,26 +2,17 @@ package com.creditdatamw.zerocell.handler;
 
 import com.creditdatamw.zerocell.ReaderUtil;
 import com.creditdatamw.zerocell.ZeroCellException;
-import com.creditdatamw.zerocell.ZeroCellReader;
-import com.creditdatamw.zerocell.annotation.Column;
-import com.creditdatamw.zerocell.annotation.RowNumber;
 import com.creditdatamw.zerocell.column.ColumnInfo;
 import com.creditdatamw.zerocell.column.ColumnMapping;
-import com.creditdatamw.zerocell.converter.Converter;
-import com.creditdatamw.zerocell.converter.Converters;
-import com.creditdatamw.zerocell.converter.NoopConverter;
-import org.apache.poi.ss.util.CellAddress;
-import org.apache.poi.ss.util.CellReference;
-import org.apache.poi.xssf.usermodel.XSSFComment;
+import com.creditdatamw.zerocell.column.RowNumberInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.lang.reflect.Field;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 import static com.creditdatamw.zerocell.column.ColumnMapping.parseColumnMappingFromAnnotations;
 
@@ -110,9 +101,7 @@ public class EntityHandler<T> {
         if (columnMapping == null) {
             columnMapping = parseColumnMappingFromAnnotations(clazz);
         }
-        final ColumnInfo rowNumberColumn = columnMapping.getRowNumberInfo();
-
-        final List<ColumnInfo> columnInfos = columnMapping.getColumns();
+        final RowNumberInfo rowNumberColumn = columnMapping.getRowNumberInfo();
         Map<Integer, ColumnInfo> infoMap = columnMapping.getColumnsMap();
         return new EntityExcelSheetHandler(this, rowNumberColumn, infoMap);
     }

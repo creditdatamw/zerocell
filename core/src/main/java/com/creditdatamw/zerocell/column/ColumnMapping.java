@@ -3,51 +3,58 @@ package com.creditdatamw.zerocell.column;
 import com.creditdatamw.zerocell.ZeroCellException;
 import com.creditdatamw.zerocell.annotation.Column;
 import com.creditdatamw.zerocell.annotation.RowNumber;
-import com.creditdatamw.zerocell.converter.NoopConverter;
 
 import java.lang.reflect.Field;
 import java.util.*;
 
 public final class ColumnMapping {
-    private final ColumnInfo rowNumberInfo;
+    private final RowNumberInfo rowNumberInfo;
     private final List<ColumnInfo> columns;
 
-    public ColumnMapping(ColumnInfo rowNumberInfo, List<ColumnInfo> columns) {
+    public ColumnMapping(RowNumberInfo rowNumberInfo, List<ColumnInfo> columns) {
         this.rowNumberInfo = rowNumberInfo;
         this.columns = columns;
     }
 
-    public ColumnMapping(ColumnInfo rowNumberInfo,ColumnInfo... columns) {
+    public ColumnMapping(RowNumberInfo rowNumberInfo,ColumnInfo... columns) {
         this.rowNumberInfo = rowNumberInfo;
         this.columns = Arrays.asList(columns);
     }
 
-    public ColumnInfo getRowNumberInfo() {
+    /**
+     * RowNumberInfo column if the {@link RowNumber} annotation is defined
+     * on the class otherwise returns <code>null</code>
+     * @return rown number info
+     */
+    public RowNumberInfo getRowNumberInfo() {
         return rowNumberInfo;
     }
 
+    /**
+     * Columns defined in this mapping. The returned list is immutable
+     * @return immutable list of ColumnInfo
+     */
     public List<ColumnInfo> getColumns() {
-        return columns;
+        return Collections.unmodifiableList(columns);
     }
-
 
     /**
      * Creates a ColumnMapping from Zerocell {@link Column}
      * and {@link RowNumber} annotations applied on a Class
      *
-     * @param clazz
-     * @return
+     * @param clazz the class to extract column mapping from
+     * @return column mapping of the class
      */
     public static ColumnMapping parseColumnMappingFromAnnotations(Class<?> clazz) {
         Field[] fieldArray = clazz.getDeclaredFields();
         ArrayList<ColumnInfo> list = new ArrayList<>(fieldArray.length);
-        ColumnInfo rowNumberColumn = null;
+        RowNumberInfo rowNumberColumn = null;
         for (Field field: fieldArray) {
 
             RowNumber rowNumberAnnotation = field.getAnnotation(RowNumber.class);
 
             if (! Objects.isNull(rowNumberAnnotation)) {
-                rowNumberColumn = new ColumnInfo("__id__", field.getName(), -1, null,Integer.class, NoopConverter.class);
+                rowNumberColumn = new RowNumberInfo(field.getName(), Integer.class);
                 continue;
             }
 
@@ -76,6 +83,7 @@ public final class ColumnMapping {
      * The method also checks the indexes duplicates and throws a
      * ZeroCellException in this case
      *
+     * @return map of column info
      * @throws ZeroCellException in the case of a duplicate index
      */
     public Map<Integer, ColumnInfo> getColumnsMap() {
