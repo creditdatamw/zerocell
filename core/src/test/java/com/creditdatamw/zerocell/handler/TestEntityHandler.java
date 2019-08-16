@@ -13,6 +13,7 @@ public class TestEntityHandler {
         EntityHandler<Person> entityHandler = new EntityHandler<>(
             Person.class,
             true,
+            0,
             0
         );
 
