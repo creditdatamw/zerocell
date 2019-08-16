@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 final class EntityExcelSheetHandler<T> implements ZeroCellReader {
-    private EntityHandler entityHandler;
+    private EntityHandler<T> entityHandler;
     private final Logger LOGGER = LoggerFactory.getLogger(EntityExcelSheetHandler.class);
 
     private final ColumnInfo rowNumberColumn;
@@ -34,7 +34,8 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
     private int currentCol = -1;
     private T cur;
 
-    EntityExcelSheetHandler(ColumnInfo rowNumberColumn, Map<Integer, ColumnInfo> columns) {
+    EntityExcelSheetHandler(EntityHandler<T> entityHandler, ColumnInfo rowNumberColumn, Map<Integer, ColumnInfo> columns) {
+        this.entityHandler = entityHandler;
         this.rowNumberColumn = rowNumberColumn;
         this.columns = columns;
         this.converters = cacheConverters();

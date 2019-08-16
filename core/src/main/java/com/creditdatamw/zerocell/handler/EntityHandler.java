@@ -114,7 +114,7 @@ public class EntityHandler<T> {
 
         final List<ColumnInfo> columnInfos = columnMapping.getColumns();
         Map<Integer, ColumnInfo> infoMap = initColumnInfosMap(columnInfos);
-        return new EntityExcelSheetHandler(rowNumberColumn, infoMap);
+        return new EntityExcelSheetHandler(this, rowNumberColumn, infoMap);
     }
 
     /**
