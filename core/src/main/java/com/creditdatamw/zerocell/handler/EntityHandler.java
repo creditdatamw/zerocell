@@ -113,26 +113,8 @@ public class EntityHandler<T> {
         final ColumnInfo rowNumberColumn = columnMapping.getRowNumberInfo();
 
         final List<ColumnInfo> columnInfos = columnMapping.getColumns();
-        Map<Integer, ColumnInfo> infoMap = initColumnInfosMap(columnInfos);
+        Map<Integer, ColumnInfo> infoMap = columnMapping.getColumnsMap();
         return new EntityExcelSheetHandler(this, rowNumberColumn, infoMap);
-    }
-
-    /**
-     * Create th map, where key is the index from @Column annotation,
-     * and value is the ColumnInfo.
-     * The method also checks the indexes duplicates and throws a ZeroCellException in this case
-     */
-    private Map<Integer, ColumnInfo> initColumnInfosMap(List<ColumnInfo> columnInfos) throws ZeroCellException {
-        Map<Integer, ColumnInfo> map = new HashMap<>();
-        columnInfos.forEach(info -> {
-            int index = info.getIndex();
-            if (Objects.isNull(map.get(index))) {
-                map.put(index, info);
-            } else {
-                throw new ZeroCellException("Cannot map two columns to the same index: " + index);
-            }
-        });
-        return map;
     }
 
     /**

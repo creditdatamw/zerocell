@@ -6,10 +6,7 @@ import com.creditdatamw.zerocell.annotation.RowNumber;
 import com.creditdatamw.zerocell.converter.NoopConverter;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public final class ColumnMapping {
     private final ColumnInfo rowNumberInfo;
@@ -71,5 +68,26 @@ public final class ColumnMapping {
         }
         list.trimToSize();
         return new ColumnMapping(rowNumberColumn, list);
+    }
+
+    /**
+     * Create th map, where key is the index from {@link Column} annotation,
+     * and value is the ColumnInfo.
+     * The method also checks the indexes duplicates and throws a
+     * ZeroCellException in this case
+     *
+     * @throws ZeroCellException in the case of a duplicate index
+     */
+    public Map<Integer, ColumnInfo> getColumnsMap() {
+        Map<Integer, ColumnInfo> map = new HashMap<>();
+        this.columns.forEach(info -> {
+            int index = info.getIndex();
+            if (Objects.isNull(map.get(index))) {
+                map.put(index, info);
+            } else {
+                throw new ZeroCellException("Cannot map two columns to the same index: " + index);
+            }
+        });
+        return map;
     }
 }
