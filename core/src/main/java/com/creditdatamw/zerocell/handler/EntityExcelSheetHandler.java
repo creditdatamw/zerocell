@@ -30,6 +30,7 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
     private boolean isHeaderRow = false;
     private int currentRow = -1;
     private int currentCol = -1;
+    private EmptyColumnCounter emptyColumnCounter = new EmptyColumnCounter();
     private T cur;
 
     EntityExcelSheetHandler(EntityHandler<T> entityHandler, ColumnInfo rowNumberColumn, Map<Integer, ColumnInfo> columns) {
@@ -114,9 +115,14 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
         }
 
         if (!Objects.isNull(cur)) {
-            this.entities.add(cur);
-            cur = null;
+            if (entityHandler.isSkipEmptyRows() && emptyColumnCounter.rowIsEmpty()) {
+                LOGGER.warn("Row#{} skipped because it is empty", i);
+            } else {
+                this.entities.add(cur);
+            }
         }
+        cur = null;
+        emptyColumnCounter.reset();
     }
 
     @Override
@@ -139,6 +145,11 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
         }
         // Prevent from trying to write to a null instance
         if (Objects.isNull(cur)) return;
+        if (entityHandler.isSkipEmptyRows()) {
+            if (formattedValue == null || formattedValue.isEmpty()) {
+                emptyColumnCounter.increment();
+            }
+        }
         writeColumnField(cur, formattedValue, currentColumnInfo, currentRow);
     }
 
@@ -187,5 +198,20 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
     @Override
     public void headerFooter(String text, boolean b, String tagName) {
         // Skip, no headers or footers in CSV
+    }
+
+    private class EmptyColumnCounter {
+        private int count = 0;
+
+        void increment() {
+            this.count += 1;
+        }
+
+        boolean rowIsEmpty() {
+            return this.count >= columns.size();
+        }
+        void reset() {
+            count = 0;
+        }
     }
 }

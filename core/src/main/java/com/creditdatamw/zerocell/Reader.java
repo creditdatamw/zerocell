@@ -28,6 +28,7 @@ public class Reader<T> {
         private String sheetName;
         private ColumnMapping columnMapping;
         private boolean skipHeaderRow = false;
+        private boolean skipEmptyRows = true;
         private int skipFirstNRows = 0;
         private int maxRowNumber = 0;
 
@@ -59,6 +60,11 @@ public class Reader<T> {
 
         public ReaderBuilder<T> skipHeaderRow(boolean value) {
             this.skipHeaderRow = value;
+            return this;
+        }
+
+        public ReaderBuilder<T> skipEmptyRows(boolean value) {
+            this.skipEmptyRows = value;
             return this;
         }
 
@@ -99,6 +105,7 @@ public class Reader<T> {
             } else {
                 entityHandler = new EntityHandler(clazz, skipHeaderRow, skipFirstNRows, maxRowNumber);
             }
+            entityHandler.setSkipEmptyRows(this.skipEmptyRows);
             entityHandler.process(file);
             return entityHandler.readAsList();
         }

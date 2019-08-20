@@ -25,6 +25,7 @@ public class EntityHandler<T> {
     private final EntityExcelSheetHandler<T> entitySheetHandler;
     private final String sheetName;
     private final boolean skipHeaderRow;
+    private boolean skipEmptyRows;
     private final int skipFirstNRows;
     private final int maxRowNumber;
 
@@ -94,6 +95,14 @@ public class EntityHandler<T> {
 
     public int getMaxRowNumber() {
         return maxRowNumber;
+    }
+
+    public boolean isSkipEmptyRows() {
+        return skipEmptyRows;
+    }
+
+    public void setSkipEmptyRows(boolean skipEmptyRows) {
+        this.skipEmptyRows = skipEmptyRows;
     }
 
     @SuppressWarnings("unchecked")
