@@ -12,7 +12,7 @@ import java.util.Objects;
 /**
  * Main API for ZeroCell
  */
-public class Reader {
+public class Reader<T> {
 
     public static <T> String[] columnsOf(Class<T> clazz) {
         return ColumnInfo.columnsOf(clazz);
@@ -29,6 +29,7 @@ public class Reader {
         private ColumnMapping columnMapping;
         private boolean skipHeaderRow = false;
         private int skipFirstNRows = 0;
+        private int maxRowNumber = 0;
 
         public ReaderBuilder(Class<T> clazz) {
             this.clazz = clazz;
@@ -63,25 +64,40 @@ public class Reader {
 
         /**
          * Set the number of rows to skip before the header
-         * @param value
-         * @return
+         *
+         * @param value is the number of rows to skip
+         * @return ReaderBuilder
          */
         public ReaderBuilder<T> skipFirstNRows(int value) {
-            assert(value > 0);
+            assert (value > 0);
             this.skipFirstNRows = value;
+            this.maxRowNumber += value;
             return this;
         }
 
+        /**
+         * Set the maximum number of rows to parse.
+         *
+         * @param rowNumber the number of rows to parse.
+         * @return ReaderBuilder
+         */
+        public ReaderBuilder<T> setRowNumber(int rowNumber) {
+            assert (rowNumber > 0);
+            this.maxRowNumber += rowNumber;
+            return this;
+        }
+
+        @SuppressWarnings("unchecked")
         public <T> List<T> list() {
             EntityHandler<T> entityHandler;
             if (!Objects.isNull(sheetName) && !Objects.isNull(columnMapping)) {
-                entityHandler = new EntityHandler(clazz, sheetName, columnMapping, skipHeaderRow, skipFirstNRows);
+                entityHandler = new EntityHandler(clazz, sheetName, columnMapping, skipHeaderRow, skipFirstNRows, maxRowNumber);
             } else if (Objects.isNull(sheetName) && !Objects.isNull(columnMapping)) {
-                entityHandler = new EntityHandler(clazz, columnMapping, skipHeaderRow, skipFirstNRows);
+                entityHandler = new EntityHandler(clazz, columnMapping, skipHeaderRow, skipFirstNRows, maxRowNumber);
             } else if (!Objects.isNull(sheetName) && Objects.isNull(columnMapping)) {
-                entityHandler = new EntityHandler(clazz, sheetName, skipHeaderRow, skipFirstNRows);
+                entityHandler = new EntityHandler(clazz, sheetName, skipHeaderRow, skipFirstNRows, maxRowNumber);
             } else {
-                entityHandler = new EntityHandler(clazz, skipHeaderRow, skipFirstNRows);
+                entityHandler = new EntityHandler(clazz, skipHeaderRow, skipFirstNRows, maxRowNumber);
             }
             entityHandler.process(file);
             return entityHandler.readAsList();

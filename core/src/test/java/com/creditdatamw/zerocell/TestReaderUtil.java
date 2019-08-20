@@ -15,10 +15,10 @@ public class TestReaderUtil {
 
     @Test
     public void testCanProcessFilePath() {
-        final EntityHandler<Person> entityHandler = new EntityHandler<>(
+        final EntityHandler<Person> entityHandler = new EntityHandler<Person>(
             Person.class,
-            "uploads",
             false,
+            0,
             0
         );
 
@@ -42,10 +42,10 @@ public class TestReaderUtil {
 
     @Test
     public void testCanProcessFile() {
-        final EntityHandler<Person> entityHandler = new EntityHandler<>(
+        final EntityHandler<Person> entityHandler = new EntityHandler<Person>(
             Person.class,
-            "uploads",
             false,
+            0,
             0
         );
         ReaderUtil.process(
@@ -68,10 +68,10 @@ public class TestReaderUtil {
 
     @Test
     public void testCanProcessInputStream() throws IOException {
-        final EntityHandler<Person> entityHandler = new EntityHandler<>(
+        final EntityHandler<Person> entityHandler = new EntityHandler<Person>(
             Person.class,
-            "uploads",
             false,
+            0,
             0
         );
         ReaderUtil.process(

@@ -43,22 +43,42 @@ public class ColumnInfo {
         this.converterClass = converterClass;
     }
 
+    /**
+     * Name of the column in the Excel file
+     * @return name of the column
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Name of the field/attribute in the class
+     * @return name of the field in the class
+     */
     public String getFieldName() {
         return fieldName;
     }
 
+    /**
+     * Index of the column in the Excel file
+     * @return column index
+     */
     public int getIndex() {
         return index;
     }
 
+    /**
+     * Data format specification.
+     * @return data format specification
+     */
     public String getDataFormat() {
         return dataFormat;
     }
 
+    /**
+     * Class of the type of the data expected at that column in the Excel file
+     * @return Class instance
+     */
     public Class<?> getType() {
         return type;
     }
@@ -67,6 +87,12 @@ public class ColumnInfo {
         return converterClass;
     }
 
+    /**
+     * Finds and extacts {@link Column} annotations from the provided class
+     *
+     * @param clazz the class to extraction annotations frlom
+     * @return list of {@link Column} annotations from the clas
+     */
     public static final List<Column> annotationsOf(Class<?> clazz) {
         Field[] fieldArray = clazz.getDeclaredFields();
         List<Column> columns = new ArrayList<>(fieldArray.length);
@@ -79,6 +105,13 @@ public class ColumnInfo {
         return columns;
     }
 
+    /**
+     * Finds the column names for all fields annotated with {@link Column}
+     * annotation.
+     *
+     * @param clazz the class to extract annotations from
+     * @return array of column names
+     */
     public static final String[] columnsOf(Class<?> clazz) {
         List<Column> columns = annotationsOf(clazz);
         String[] columnNames = new String[columns.size()];

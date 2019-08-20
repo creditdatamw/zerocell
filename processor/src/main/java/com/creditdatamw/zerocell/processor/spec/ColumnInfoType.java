@@ -106,7 +106,7 @@ class ColumnInfoType {
                     typeClazz = mte.getTypeMirror();
                 }
                 try {
-                    annotation.convertorClass();
+                    annotation.converterClass();
                 } catch (MirroredTypeException mte) {
                     converterClazz = mte.getTypeMirror();
                 }

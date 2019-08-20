@@ -14,7 +14,7 @@ public class Person {
     @RowNumber
     private int row;
 
-    @Column(name= "ID", index=0, convertorClass = IdPrefixingConverter.class)
+    @Column(name= "ID", index=0, converterClass = IdPrefixingConverter.class)
     private String id;
 
     @Column(name = "FIRST_NAME", index = 1)

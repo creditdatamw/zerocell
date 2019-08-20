@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class AnnotationProcessorExample {
     /**
-     * Main method
+     * MainEntity method
      *
      * @param args
      * @throws ZeroCellException
