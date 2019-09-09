@@ -27,11 +27,6 @@ public class Reader {
 
     public static final class ReaderBuilder<T> {
         private final Class<T> clazz;
-        /**
-         * @deprecated use input instead
-         */
-        @Deprecated
-        private File file;
         private InputStream input;
         private String sheetName;
         private ColumnMapping columnMapping;
@@ -49,7 +44,11 @@ public class Reader {
         @Deprecated
         public ReaderBuilder<T> from(File file) {
             Objects.requireNonNull(file);
-            this.file = file;
+            try {
+                this.input = new FileInputStream(file);
+            } catch (FileNotFoundException e) {
+                throw new ZeroCellException(e);
+            }
             return this;
         }
 
@@ -117,10 +116,7 @@ public class Reader {
             } else {
                 entityHandler = new EntityHandler(clazz, skipHeaderRow, skipFirstNRows, maxRowNumber);
             }
-            try {
-                entityHandler.process(input != null ? input : new FileInputStream(file));
-            } catch (FileNotFoundException ignored) {
-            }
+            entityHandler.process(input);
             return entityHandler.readAsList();
         }
     }
