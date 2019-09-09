@@ -1,23 +1,21 @@
 package com.creditdatamw.zerocell.handler;
 
-import com.creditdatamw.zerocell.ReaderUtil;
-import com.creditdatamw.zerocell.ZeroCellException;
-import com.creditdatamw.zerocell.column.ColumnInfo;
-import com.creditdatamw.zerocell.column.ColumnMapping;
-import com.creditdatamw.zerocell.column.RowNumberInfo;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.File;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.creditdatamw.zerocell.ReaderUtil;
+import com.creditdatamw.zerocell.ZeroCellException;
+import com.creditdatamw.zerocell.column.ColumnInfo;
+import com.creditdatamw.zerocell.column.ColumnMapping;
+import com.creditdatamw.zerocell.column.RowNumberInfo;
+
 import static com.creditdatamw.zerocell.column.ColumnMapping.parseColumnMappingFromAnnotations;
 
 public class EntityHandler<T> {
-    private static final Logger LOGGER = LoggerFactory.getLogger(EntityHandler.class);
 
     private static final String DEFAULT_SHEET = "uploads";
 
@@ -112,12 +110,19 @@ public class EntityHandler<T> {
      * @return an immutable list of the extracted entities
      */
     public List<T> readAsList() {
-        List<T> list = Collections.unmodifiableList(this.entitySheetHandler.read(null, sheetName));
-        return list;
+        return Collections.unmodifiableList(this.entitySheetHandler.read(null, sheetName));
     }
 
+    /**
+     * @deprecated use {@link #process(InputStream)} instead
+     */
+    @Deprecated
     public void process(File file) throws ZeroCellException {
         ReaderUtil.process(file, sheetName, this.entitySheetHandler);
+    }
+
+    public void process(InputStream input) throws ZeroCellException {
+        ReaderUtil.process(input, sheetName, this.entitySheetHandler);
     }
 
     public Class<T> getEntityClass() {

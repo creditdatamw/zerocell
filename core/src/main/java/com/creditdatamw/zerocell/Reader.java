@@ -6,13 +6,16 @@ import com.creditdatamw.zerocell.column.RowNumberInfo;
 import com.creditdatamw.zerocell.handler.EntityHandler;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
 
 /**
  * Main API for ZeroCell
  */
-public class Reader<T> {
+public class Reader {
 
     public static <T> String[] columnsOf(Class<T> clazz) {
         return ColumnInfo.columnsOf(clazz);
@@ -24,7 +27,12 @@ public class Reader<T> {
 
     public static final class ReaderBuilder<T> {
         private final Class<T> clazz;
+        /**
+         * @deprecated use input instead
+         */
+        @Deprecated
         private File file;
+        private InputStream input;
         private String sheetName;
         private ColumnMapping columnMapping;
         private boolean skipHeaderRow = false;
@@ -35,9 +43,19 @@ public class Reader<T> {
             this.clazz = clazz;
         }
 
+        /**
+         * @deprecated use {@link #from(java.io.InputStream)} instead
+         */
+        @Deprecated
         public ReaderBuilder<T> from(File file) {
             Objects.requireNonNull(file);
             this.file = file;
+            return this;
+        }
+
+        public ReaderBuilder<T> from(InputStream input) {
+            Objects.requireNonNull(input);
+            this.input = input;
             return this;
         }
 
@@ -88,7 +106,7 @@ public class Reader<T> {
         }
 
         @SuppressWarnings("unchecked")
-        public <T> List<T> list() {
+        public List<T> list() {
             EntityHandler<T> entityHandler;
             if (!Objects.isNull(sheetName) && !Objects.isNull(columnMapping)) {
                 entityHandler = new EntityHandler(clazz, sheetName, columnMapping, skipHeaderRow, skipFirstNRows, maxRowNumber);
@@ -99,7 +117,10 @@ public class Reader<T> {
             } else {
                 entityHandler = new EntityHandler(clazz, skipHeaderRow, skipFirstNRows, maxRowNumber);
             }
-            entityHandler.process(file);
+            try {
+                entityHandler.process(input != null ? input : new FileInputStream(file));
+            } catch (FileNotFoundException ignored) {
+            }
             return entityHandler.readAsList();
         }
     }
