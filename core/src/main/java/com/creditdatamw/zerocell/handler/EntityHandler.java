@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import static com.creditdatamw.zerocell.column.ColumnMapping.parseColumnMappingFromAnnotations;
 
@@ -74,6 +75,10 @@ public class EntityHandler<T> {
 
     private boolean isRowNumberValueSetted() {
         return this.maxRowNumber != 0 && this.maxRowNumber != this.skipFirstNRows;
+    }
+
+    public void onRowRead(Consumer<T> onReadConsumer) {
+        this.entitySheetHandler.setNewEntityConsumer(onReadConsumer);
     }
 
     public String getSheetName() {

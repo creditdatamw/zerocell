@@ -8,6 +8,7 @@ import com.creditdatamw.zerocell.handler.EntityHandler;
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 /**
  * Main API for ZeroCell
@@ -30,6 +31,7 @@ public class Reader<T> {
         private boolean skipHeaderRow = false;
         private int skipFirstNRows = 0;
         private int maxRowNumber = 0;
+        private Consumer<T> onRowRead;
 
         public ReaderBuilder(Class<T> clazz) {
             this.clazz = clazz;
@@ -87,8 +89,13 @@ public class Reader<T> {
             return this;
         }
 
+        ReaderBuilder<T> setRowReadConsumer(Consumer<T> fn) {
+            this.onRowRead = fn;
+            return this;
+        }
+
         @SuppressWarnings("unchecked")
-        public <T> List<T> list() {
+        public List<T> list() {
             EntityHandler<T> entityHandler;
             if (!Objects.isNull(sheetName) && !Objects.isNull(columnMapping)) {
                 entityHandler = new EntityHandler(clazz, sheetName, columnMapping, skipHeaderRow, skipFirstNRows, maxRowNumber);
@@ -99,6 +106,7 @@ public class Reader<T> {
             } else {
                 entityHandler = new EntityHandler(clazz, skipHeaderRow, skipFirstNRows, maxRowNumber);
             }
+            entityHandler.onRowRead(this.onRowRead);
             entityHandler.process(file);
             return entityHandler.readAsList();
         }

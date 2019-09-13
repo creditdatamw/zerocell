@@ -61,6 +61,24 @@ public class TestReader {
     }
 
     @Test
+    public void testShouldRegisterConsumer() {
+        List<Person> people = Reader.of(Person.class)
+                                .from(new File("src/test/resources/test_people.xlsx"))
+                                .sheet("uploads")
+                                .setRowReadConsumer((person) -> {
+                                    assertNotNull(person);
+                                    assertFalse(person.getFirstName().isEmpty());
+                                    if (person.getRowNumber() == 1) {
+                                        assertEquals("Zikani", person.getFirstName());
+                                    }
+                                })
+                                .list();
+        assertNotNull(people);
+        assertFalse(people.isEmpty());
+        assertEquals(5, people.size());
+    }
+
+    @Test
     public void testShouldExtractColumns() {
         String[] columnNames = new String[] {
             "ID", "FIRST_NAME", "MIDDLE_NAME", "LAST_NAME", "DATE_OF_BIRTH", "FAV_NUMBER", "DATE_REGISTERED"

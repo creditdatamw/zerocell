@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.function.Consumer;
 
 import static com.creditdatamw.zerocell.converter.ConverterUtils.convertValueToType;
 
@@ -27,6 +28,7 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
     private final List<T> entities;
     private final Converter NOOP_CONVERTER = new NoopConverter();
     private final Map<Integer, Converter> converters;
+    private Consumer<T> newEntityConsumer;
     private boolean isHeaderRow = false;
     private int currentRow = -1;
     private int currentCol = -1;
@@ -115,6 +117,12 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
 
         if (!Objects.isNull(cur)) {
             this.entities.add(cur);
+            try {
+                if (newEntityConsumer != null) newEntityConsumer.accept(cur);
+            } catch(Exception e) {
+                // If consumer throws an exception, not our problem.
+                // Life goes on..
+            }
             cur = null;
         }
     }
@@ -187,5 +195,13 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
     @Override
     public void headerFooter(String text, boolean b, String tagName) {
         // Skip, no headers or footers in CSV
+    }
+
+    public Consumer<T> getNewEntityConsumer() {
+        return newEntityConsumer;
+    }
+
+    public void setNewEntityConsumer(Consumer<T> newEntityConsumer) {
+        this.newEntityConsumer = newEntityConsumer;
     }
 }
