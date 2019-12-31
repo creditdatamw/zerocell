@@ -18,7 +18,7 @@ public class TestEntityHandler {
         );
 
         assertEquals(Person.class, entityHandler.getEntityClass());
-        assertEquals("uploads", entityHandler.getSheetName());
+        assertEquals("ZEROCELL_READ_FIRST_SHEET_0", entityHandler.getSheetName());
         assertTrue(entityHandler.isSkipHeaderRow());
         assertEquals(0, entityHandler.getSkipFirstNRows());
     }
