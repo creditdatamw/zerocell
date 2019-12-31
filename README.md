@@ -191,6 +191,13 @@ public class PersonReader implements ZeroCellReader {
 }
 ```
 
+## Loading the Correct Sheet
+
+If you do not specify the name of the sheet to load from, zerocell attempts to
+load data from the first Sheet in the Workbook. If the Sheet doesn't have matching
+columns as the defined model an exception will be thrown. In order to ensure
+the correct sheet is loaded it is recommended to always specify the sheet name.
+
 ## Exception Handling
 
 The API throws `ZeroCellException` if something goes wrong, e.g. sheet not found. 
