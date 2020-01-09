@@ -18,6 +18,10 @@ import java.util.Objects;
 public class Converters {
     private static final Logger LOGGER = LoggerFactory.getLogger(Converters.class);
 
+    public static DefaultConverters newDefaultConverters() {
+        return new DefaultConverters();
+    }
+
     public static final Converter<Float> toFloat = ((formattedValue, columnName, row) -> {
         try {
             return Float.valueOf(formattedValue);

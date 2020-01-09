@@ -160,7 +160,13 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
             Object value = null;
             // Don't use a converter if there isn't a custom one
             if (converter instanceof NoopConverter) {
-                value = convertValueToType(currentColumnInfo.getType(), formattedValue, currentColumnInfo.getName(), rowNum);
+                value = convertValueToType(
+                        currentColumnInfo.getType(),
+                        formattedValue,
+                        currentColumnInfo.getName(),
+                        rowNum,
+                        currentColumnInfo.getFallbackStrategy()
+                );
             } else {
                 // Handle any exceptions thrown by the converter - this stops execution of the whole process
                 try {
