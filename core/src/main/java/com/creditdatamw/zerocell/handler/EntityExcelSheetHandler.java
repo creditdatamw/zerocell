@@ -183,7 +183,15 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
                 try {
                     value = converter.convert(formattedValue, currentColumnInfo.getName(), rowNum);
                 } catch (Exception e) {
-                    throw new ZeroCellException(String.format("%s threw an exception while trying to convert value %s ", converter.getClass().getName(), formattedValue), e);
+                    String messageTemplate = "Failed to convert value '%s' at Column(name='%s', index='%s', row='%s')" ;
+                    String message = String.format(messageTemplate,
+                            formattedValue,
+                            currentColumnInfo.getName(),
+                            currentColumnInfo.getIndex(),
+                            rowNum);
+
+                    LOGGER.warn(message + " using: " + converter.getClass().getName(), e);
+                    throw new ZeroCellException(message + " using: " + converter.getClass().getSimpleName(), e);
                 }
             }
             Field field = entityHandler.getEntityClass()
