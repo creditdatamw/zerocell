@@ -1,14 +1,12 @@
 package com.creditdatamw.zerocell.converter;
 
 import com.creditdatamw.zerocell.ZeroCellException;
-import org.slf4j.LoggerFactory;
 
 public class DoubleConverter extends DefaultConverter<Double> {
     private static final String message = "Failed to parse '%s' as Double at column='%s' row='%s'";
 
     @Override
     public Double convert(String value, String columnName, int row) {
-        LoggerFactory.getLogger(getClass()).info("Trying to convert '{}' to double", value);
         try {
             return Double.parseDouble(value);
         } catch (Exception e) {
