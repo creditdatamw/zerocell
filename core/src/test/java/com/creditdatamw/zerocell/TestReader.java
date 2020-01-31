@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -41,6 +42,17 @@ public class TestReader {
 
         assertEquals(1, zikani.getRowNumber());
         assertEquals("Zikani", zikani.getFirstName());
+    }
+    @Test
+    public void testShouldReturnStream() {
+        Optional<Person> zikani = Reader.of(Person.class)
+            .from(new File("src/test/resources/test_people.xlsx"))
+            .sheet("uploads")
+            .stream()
+            .findFirst();
+        assertTrue(zikani.isPresent());
+        assertEquals(1, zikani.get().getRowNumber());
+        assertEquals("Zikani", zikani.get().getFirstName());
     }
 
     @Test

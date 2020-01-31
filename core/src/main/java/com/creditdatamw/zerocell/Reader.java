@@ -8,6 +8,7 @@ import com.creditdatamw.zerocell.handler.EntityHandler;
 import java.io.File;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 /**
  * Main API for ZeroCell
@@ -87,8 +88,14 @@ public class Reader<T> {
             return this;
         }
 
+        /**
+         * Processes the file
+         *
+         * @param <T>
+         * @return EntityHandler instance
+         */
         @SuppressWarnings("unchecked")
-        public <T> List<T> list() {
+        private <T> EntityHandler<T> processFile() {
             EntityHandler<T> entityHandler;
             if (!Objects.isNull(sheetName) && !Objects.isNull(columnMapping)) {
                 entityHandler = new EntityHandler(clazz, sheetName, columnMapping, skipHeaderRow, skipFirstNRows, maxRowNumber);
@@ -100,7 +107,25 @@ public class Reader<T> {
                 entityHandler = new EntityHandler(clazz, skipHeaderRow, skipFirstNRows, maxRowNumber);
             }
             entityHandler.process(file);
+            return entityHandler;
+        }
+
+        /**
+         * Reads the Entities from the Excel file and returns a list
+         * @return List of entities
+         */
+        public List<T> list() {
+            EntityHandler<T> entityHandler = processFile();
             return entityHandler.readAsList();
+        }
+
+        /**
+         * Reads the Entities the Excel file and returns a Stream
+         * @return Stream of entities
+         */
+        public Stream<T> stream() {
+            EntityHandler<T> entityHandler = processFile();
+            return entityHandler.readAsStream();
         }
     }
 }

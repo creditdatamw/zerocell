@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.creditdatamw.zerocell.converter.ConverterUtils.convertValueToType;
 
@@ -24,7 +26,7 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
 
     private final ColumnInfo rowNumberColumn;
     private final Map<Integer, ColumnInfo> columns;
-    private final List<T> entities;
+    private Stream.Builder<T> streamBuilder;
     private final Converter NOOP_CONVERTER = new NoopConverter();
     private final Map<Integer, Converter> converters;
     private boolean isHeaderRow = false;
@@ -37,7 +39,7 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
         this.rowNumberColumn = rowNumberColumn;
         this.columns = columns;
         this.converters = cacheConverters();
-        this.entities = new ArrayList<>();
+        this.streamBuilder = Stream.builder();
     }
 
     private Map<Integer, Converter> cacheConverters() {
@@ -67,14 +69,19 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
          * We don't need to process the file here since that's
          * handled in {@link ReaderUtil} which MUST be used when using this class
          */
-        return Collections.unmodifiableList(this.entities);
+        return getEntityStream().collect(Collectors.toList());
+    }
+
+    public Stream<T> getEntityStream() {
+        return this.streamBuilder.build();
     }
 
     void clear() {
         this.currentRow = -1;
         this.currentCol = -1;
         this.cur = null;
-        this.entities.clear();
+        this.streamBuilder = null;
+        this.streamBuilder = Stream.builder();
     }
 
     @Override
@@ -114,7 +121,8 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
         }
 
         if (!Objects.isNull(cur)) {
-            this.entities.add(cur);
+            // this.entities.add(cur);
+            streamBuilder.add(cur);
             cur = null;
         }
     }

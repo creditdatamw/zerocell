@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 import static com.creditdatamw.zerocell.column.ColumnMapping.parseColumnMappingFromAnnotations;
 
@@ -114,6 +115,10 @@ public class EntityHandler<T> {
     public List<T> readAsList() {
         List<T> list = Collections.unmodifiableList(this.entitySheetHandler.read(null, sheetName));
         return list;
+    }
+
+    public Stream<T> readAsStream() {
+        return this.entitySheetHandler.getEntityStream();
     }
 
     public void process(File file) throws ZeroCellException {
