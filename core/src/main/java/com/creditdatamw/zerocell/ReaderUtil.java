@@ -1,5 +1,6 @@
 package com.creditdatamw.zerocell;
 
+import com.creditdatamw.zerocell.handler.EntityHandler;
 import org.apache.poi.EmptyFileException;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
@@ -81,6 +82,18 @@ public final class ReaderUtil {
         }
     }
 
+    /**
+     * Processes data from an Excel file contained in the OPCPackage using the
+     * reader implementation
+     * <p>
+     * Please note that the process will read data from the first sheet in the
+     * File when if sheet name is not specified
+     * (i.e. the sheet name defaults to the {@link EntityHandler.DEFAULT_SHEET})
+     * </p>
+     * @param opcPackage the OpenXML OPC Package
+     * @param sheetName The sheet name
+     * @param reader the reader implementation that handles the entity mapping
+     */
     private static void process(OPCPackage opcPackage, String sheetName, ZeroCellReader reader) {
         try {
             DataFormatter dataFormatter = new DataFormatter();
@@ -91,6 +104,10 @@ public final class ReaderUtil {
             XSSFReader.SheetIterator sheets = (XSSFReader.SheetIterator) xssfReader.getSheetsData();
             while (sheets.hasNext()) {
                 sheetInputStream = sheets.next();
+
+                if (EntityHandler.DEFAULT_SHEET.equalsIgnoreCase(sheetName)) {
+                    break;
+                }
                 if (sheets.getSheetName().equalsIgnoreCase(sheetName)) {
                     break;
                 } else {

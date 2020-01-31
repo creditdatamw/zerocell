@@ -19,7 +19,7 @@ import static com.creditdatamw.zerocell.column.ColumnMapping.parseColumnMappingF
 public class EntityHandler<T> {
     private static final Logger LOGGER = LoggerFactory.getLogger(EntityHandler.class);
 
-    private static final String DEFAULT_SHEET = "uploads";
+    public static final String DEFAULT_SHEET = "ZEROCELL_READ_FIRST_SHEET_0";
 
     private final Class<T> type;
     private final EntityExcelSheetHandler<T> entitySheetHandler;
