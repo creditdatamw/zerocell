@@ -6,7 +6,7 @@
 
 	<groupId>com.creditdatamw.labs</groupId>
     <artifactId>zerocell-parent</artifactId>
-    <version>0.4.1-SNAPSHOT</version>
+    <version>0.4.1</version>
     <packaging>pom</packaging>
     <url>https://github.com/creditdatamw/zerocell</url>
 
