@@ -1,10 +1,9 @@
 package com.creditdatamw.zerocell.converter;
 
+import com.creditdatamw.zerocell.internal.IgnoreInvalidValueException;
 import com.creditdatamw.zerocell.ZeroCellException;
 
-import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.Objects;
 
 public class SqlTimestampConverter extends DefaultConverter<Timestamp> {
     private static final String message = "Failed to parse '%s' as java.sql.Timestamp at column='%s' row='%s'";
@@ -17,6 +16,8 @@ public class SqlTimestampConverter extends DefaultConverter<Timestamp> {
                 case LEGACY:
                 case DEFAULT_TO_NULL:
                     return null;
+                case IGNORE:
+                    throw new IgnoreInvalidValueException();
                 case DEFAULT:
                 case THROW_EXCEPTION:
                 default:

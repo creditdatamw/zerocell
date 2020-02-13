@@ -1,5 +1,6 @@
 package com.creditdatamw.zerocell.converter;
 
+import com.creditdatamw.zerocell.internal.IgnoreInvalidValueException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -23,5 +24,13 @@ public class TestDoubleConverter {
         val = converter.convert("1.0", "COLUMN_NAME", 1);
         assertNotEquals(Double.MIN_VALUE, val, 0.0);
         assertEquals(1.0, val, 0.0);
+    }
+
+    @Test(expected = IgnoreInvalidValueException.class)
+    public void testShouldThrowExceptionWhen_DO_NOT_SET_StrategyIsUsed() {
+        DefaultConverter<Double> converter = new DoubleConverter()
+                .withFallbackStrategy(FallbackStrategy.IGNORE);
+
+        converter.convert(null, "COLUMN_NAME", 1);
     }
 }
