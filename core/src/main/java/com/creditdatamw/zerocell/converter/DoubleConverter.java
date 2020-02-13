@@ -1,5 +1,6 @@
 package com.creditdatamw.zerocell.converter;
 
+import com.creditdatamw.zerocell.internal.IgnoreInvalidValueException;
 import com.creditdatamw.zerocell.ZeroCellException;
 
 public class DoubleConverter extends DefaultConverter<Double> {
@@ -18,6 +19,8 @@ public class DoubleConverter extends DefaultConverter<Double> {
                     return 0.0D;
                 case THROW_EXCEPTION:
                     throw new ZeroCellException(String.format(message, value, columnName, row));
+                case IGNORE:
+                    throw new IgnoreInvalidValueException();
                 case DEFAULT_TO_MIN_VALUE:
                 case DEFAULT:
                 default:
