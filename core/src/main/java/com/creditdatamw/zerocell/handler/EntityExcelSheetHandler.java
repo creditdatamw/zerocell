@@ -6,6 +6,7 @@ import com.creditdatamw.zerocell.ZeroCellReader;
 import com.creditdatamw.zerocell.column.ColumnInfo;
 import com.creditdatamw.zerocell.converter.Converter;
 import com.creditdatamw.zerocell.converter.NoopConverter;
+import com.creditdatamw.zerocell.internal.IgnoreInvalidValueException;
 import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFComment;
@@ -21,6 +22,7 @@ import static com.creditdatamw.zerocell.converter.ConverterUtils.convertValueToT
 final class EntityExcelSheetHandler<T> implements ZeroCellReader {
     private EntityHandler<T> entityHandler;
     private final Logger LOGGER = LoggerFactory.getLogger(EntityExcelSheetHandler.class);
+    private final ColumnFieldWriter columnFieldWriter = new ColumnFieldWriter();
 
     private final ColumnInfo rowNumberColumn;
     private final Map<Integer, ColumnInfo> columns;
@@ -153,6 +155,7 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
         writeColumnField(cur, formattedValue, currentColumnInfo, currentRow);
     }
 
+
     /**
      * Write the value read from the excel cell to a field
      *
@@ -162,50 +165,25 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
      * @param rowNum            the row number
      */
     private void writeColumnField(T object, String formattedValue, ColumnInfo currentColumnInfo, int rowNum) {
-        String fieldName = currentColumnInfo.getFieldName();
+        Converter converter = NOOP_CONVERTER;
+        if (currentColumnInfo.getIndex() != -1) {
+            converter = converters.get(currentColumnInfo.getIndex());
+        }
         try {
-            Converter converter = NOOP_CONVERTER;
-            if (currentColumnInfo.getIndex() != -1) {
-                converter = converters.get(currentColumnInfo.getIndex());
-            }
-            Object value = null;
-            // Don't use a converter if there isn't a custom one
-            if (converter instanceof NoopConverter) {
-                value = convertValueToType(
-                        currentColumnInfo.getType(),
-                        formattedValue,
-                        currentColumnInfo.getName(),
-                        rowNum,
-                        currentColumnInfo.getFallbackStrategy()
-                );
-            } else {
-                // Handle any exceptions thrown by the converter - this stops execution of the whole process
-                try {
-                    value = converter.convert(formattedValue, currentColumnInfo.getName(), rowNum);
-                } catch (Exception e) {
-                    String messageTemplate = "Failed to convert value '%s' at Column(name='%s', index='%s', row='%s')" ;
-                    String message = String.format(messageTemplate,
-                            formattedValue,
-                            currentColumnInfo.getName(),
-                            currentColumnInfo.getIndex(),
-                            rowNum);
-
-                    LOGGER.warn(message + " using: " + converter.getClass().getName(), e);
-                    throw new ZeroCellException(message + " using: " + converter.getClass().getSimpleName(), e);
-                }
-            }
             Field field = entityHandler.getEntityClass()
-                    .getDeclaredField(currentColumnInfo.getFieldName());
-            boolean access = field.isAccessible();
-            if (!access) {
-                field.setAccessible(true);
-            }
-            field.set(cur, value);
-            field.setAccessible(field.isAccessible() && access);
-        } catch (IllegalArgumentException e) {
-            throw new ZeroCellException(String.format("Failed to write value %s to field %s at row %s", formattedValue, fieldName, rowNum));
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            LOGGER.error("Failed to set field: {}", fieldName, e);
+                .getDeclaredField(currentColumnInfo.getFieldName());
+
+            columnFieldWriter.writeColumnField(
+                field,
+                cur,
+                formattedValue,
+                currentColumnInfo,
+                rowNum,
+                converter
+            );
+        } catch (NoSuchFieldException e) {
+            LOGGER.error("Failed to set field '{}' because it does not exist. Got 'NoSuchFieldException'", currentColumnInfo.getFieldName());
+            return;
         }
     }
 
