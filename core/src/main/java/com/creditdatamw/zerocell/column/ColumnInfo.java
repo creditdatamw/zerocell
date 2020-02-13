@@ -32,6 +32,10 @@ public class ColumnInfo {
         this(name, fieldName, index, "", dataType, NoopConverter.class);
     }
 
+    public ColumnInfo(String name, String fieldName, int index, Class<?> dataType, FallbackStrategy fallbackStrategy) {
+        this(name, fieldName, index, "", dataType, NoopConverter.class, fallbackStrategy);
+    }
+
     public ColumnInfo(String name, String fieldName, int index, String dataFormat, Class<?> type, Class<?> converterClass) {
         this(name, fieldName, index, dataFormat, type, converterClass, FallbackStrategy.DEFAULT);
     }
