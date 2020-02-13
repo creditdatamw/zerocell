@@ -1,5 +1,6 @@
 package com.creditdatamw.zerocell.converter;
 
+import com.creditdatamw.zerocell.internal.IgnoreInvalidValueException;
 import com.creditdatamw.zerocell.ZeroCellException;
 
 import java.time.LocalDate;
@@ -15,6 +16,8 @@ public class LocalDateConverter extends DefaultConverter<LocalDate> {
                 case LEGACY:
                 case DEFAULT_TO_NULL:
                     return null;
+                case IGNORE:
+                    throw new IgnoreInvalidValueException();
                 case DEFAULT:
                 case THROW_EXCEPTION:
                 default:

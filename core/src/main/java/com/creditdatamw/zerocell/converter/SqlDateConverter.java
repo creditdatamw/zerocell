@@ -1,9 +1,9 @@
 package com.creditdatamw.zerocell.converter;
 
+import com.creditdatamw.zerocell.internal.IgnoreInvalidValueException;
 import com.creditdatamw.zerocell.ZeroCellException;
 
 import java.sql.Date;
-import java.util.Objects;
 
 public class SqlDateConverter extends DefaultConverter<Date> {
     private static final String message = "Failed to parse '%s' as java.sql.Date at column='%s' row='%s'";
@@ -17,6 +17,8 @@ public class SqlDateConverter extends DefaultConverter<Date> {
                 case LEGACY:
                 case DEFAULT_TO_NULL:
                     return null;
+                case IGNORE:
+                    throw new IgnoreInvalidValueException();
                 case DEFAULT:
                 case THROW_EXCEPTION:
                 default:
