@@ -15,7 +15,7 @@ public enum FallbackStrategy {
     DEFAULT,
     /**
      * Ignores the invalid value from the Excel Cell -
-     * does not set anything on the field
+     * does not set anything on the field. Basically skips the field.
      */
     IGNORE,
     /**
