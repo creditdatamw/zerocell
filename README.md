@@ -191,6 +191,104 @@ public class PersonReader implements ZeroCellReader {
 }
 ```
 
+
+## Using Converters
+
+Converters allow you to process the value loaded from an Excel Cell for a 
+particular field, primarily converters enable you to transform String values to 
+another data type. This allows you to load data into fields that have types 
+other than the default supported types.
+
+An example converter is shown below:
+
+```java
+public class SimpleISOCurrency {
+    public final String isoCurrency;
+    public final double amount;
+
+    public SimpleISOCurrency(String iso, double amount) {
+        assert amount > 0.0;
+        this.isoCurrency = iso;
+        this.amount = amount;
+    }
+}
+
+public class MalawiKwachaConverter implements Converter<SimpleISOCurrency> {
+    @Override
+    public SimpleISOCurrency convert(String value, String columnName, int row) {
+        return new SimpleISOCurrency("MWK", Double.parseDouble(value));
+    }
+}
+
+// Usage looks like this:
+
+// ...
+@Column(index=1, name="Balance (MWK)", converter=MalawiKwachaConverter.class)
+private SimpleISOCurrency balance;
+// ...
+```
+
+### Using converters for pre-processing
+
+You can also use converters as sort of pre-processing step where you operate on 
+the String from the file before it's set on the field.
+
+Below is a simple example:
+
+```java
+/**
+ * Simple Converter that prefixes values with ID-
+ */
+public class IdPrefixingConverter implements Converter<String> {
+    @Override
+    public String convert(String value, String columnName, int row) {
+        return String.format("ID-%s", value);
+    }
+}
+
+// Usage looks like this:
+
+// ...
+@Column(index=3, name="ID No.", converter=IdPrefixingConverter.class)
+private String idNo;
+// ...
+```
+
+### Basic ISO LocalDate Converter
+
+Below is a simple implementation of an converter for `java.time.LocalDate` that
+you can use. 
+
+> Please note: that if you need to parse date times considering timezones 
+> you should implement your own converter and use a type like 
+> [OffsetDateTime](https://docs.oracle.com/javase/8/docs/api/java/time/OffsetDateTime.html)
+
+```java
+
+public class BasicISOLocalDateConverter implements Converter<LocalDate> {
+    /**
+    * Basic ISO converter - attempts to parse a string that is formatted as an
+    * ISO8601 date and convert it to a java.time.LocalDate instance.
+    * 
+    * @param value the value to convert
+    * @param column the name of the current column
+    * @param row the current row index
+    * 
+    * @throws ZeroCellException if the value cannot be parsed as an ISO date
+    */
+    @Override
+    public LocalDate convert(String value, String column, int row) {
+        if (value == null) return null;
+        DateTimeFormatter formatter = DateTimeFormatter.BASIC_ISO_DATE;
+        try {
+            return LocalDate.parse(value, formatter);
+        } catch (DateTimeParseException e) {
+            throw new ZeroCellException(e);
+        }
+    }
+}
+```
+
 ## Loading the Correct Sheet
 
 If you do not specify the name of the sheet to load from, zerocell attempts to
