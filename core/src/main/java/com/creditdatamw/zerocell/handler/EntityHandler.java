@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -127,6 +128,10 @@ public class EntityHandler<T> {
 
     public void process(File file) throws ZeroCellException {
         ReaderUtil.process(file, sheetName, this.entitySheetHandler);
+    }
+
+    public void process(InputStream inputStream) {
+        ReaderUtil.process(inputStream, sheetName, this.entitySheetHandler);
     }
 
     public Class<T> getEntityClass() {
