@@ -6,6 +6,7 @@ import com.creditdatamw.zerocell.column.RowNumberInfo;
 import com.creditdatamw.zerocell.handler.EntityHandler;
 
 import java.io.File;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,6 +32,7 @@ public class Reader<T> {
         private boolean skipEmptyRows = true;
         private int skipFirstNRows = 0;
         private int maxRowNumber = 0;
+        private InputStream inputStream;
 
         public ReaderBuilder(Class<T> clazz) {
             this.clazz = clazz;
@@ -39,6 +41,12 @@ public class Reader<T> {
         public ReaderBuilder<T> from(File file) {
             Objects.requireNonNull(file);
             this.file = file;
+            return this;
+        }
+
+        public ReaderBuilder<T> from(InputStream inputStream) {
+            Objects.requireNonNull(inputStream);
+            this.inputStream = inputStream;
             return this;
         }
 
@@ -106,7 +114,13 @@ public class Reader<T> {
                 entityHandler = new EntityHandler(clazz, skipHeaderRow, skipFirstNRows, maxRowNumber);
             }
             entityHandler.setSkipEmptyRows(this.skipEmptyRows);
-            entityHandler.process(file);
+
+            if (Objects.nonNull(file)) {
+                entityHandler.process(file);
+            } else {
+                entityHandler.process(inputStream);
+            }
+
             return entityHandler.readAsList();
         }
     }

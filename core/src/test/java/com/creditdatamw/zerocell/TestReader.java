@@ -3,6 +3,8 @@ package com.creditdatamw.zerocell;
 
 import com.creditdatamw.zerocell.annotation.Column;
 import com.creditdatamw.zerocell.annotation.RowNumber;
+import com.creditdatamw.zerocell.column.ColumnInfo;
+import com.creditdatamw.zerocell.column.RowNumberInfo;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -10,6 +12,9 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
@@ -58,6 +63,32 @@ public class TestReader {
 
         assertEquals(1, zikani.getRowNumber());
         assertEquals("Zikani", zikani.getFirstName());
+    }
+
+    @Test
+    public void testShouldReadFromInputStream() throws IOException {
+        InputStream inputStream = Files.newInputStream(
+                Paths.get("src", "test", "resources", "test_people.xlsx"));
+
+        List<Person> persons = Reader.of(Person.class)
+                .from(inputStream)
+                .sheet("uploads")
+                .using(
+                        new RowNumberInfo("rowNumber", Integer.class),
+                        new ColumnInfo("ID", "id", 0, String.class),
+                        new ColumnInfo("FIRST_NAME", "firstName", 1, String.class),
+                        new ColumnInfo("MIDDLE_NAME", "middleName", 2, String.class),
+                        new ColumnInfo("LAST_NAME", "lastName", 3, String.class),
+                        new ColumnInfo("DATE_OF_BIRTH", "dateOfBirth", 4, LocalDate.class),
+                        new ColumnInfo("FAV_NUMBER", "favouriteNumber", 5, Integer.class),
+                        new ColumnInfo("DATE_REGISTERED", "dateOfRegistration", 6, Date.class)
+                )
+                .list();
+
+        assertNotNull(persons);
+        assertSame(5, persons.size());
+        assertEquals("Mwafulirwa", persons.get(2).getLastName());
+        assertEquals(1, persons.get(4).getFavouriteNumber());
     }
 
     @Test
