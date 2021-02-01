@@ -48,7 +48,7 @@ public class ColumnInfo {
      * @return name of the column
      */
     public String getName() {
-        return name.toUpperCase().trim();
+        return name.replaceAll("_", " ").toUpperCase().trim();
     }
 
     /**

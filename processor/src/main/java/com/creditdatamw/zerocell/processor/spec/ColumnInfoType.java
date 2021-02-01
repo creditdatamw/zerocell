@@ -37,7 +37,7 @@ class ColumnInfoType {
     }
 
     public String getName() {
-        return name.toUpperCase().trim();
+        return name.replaceAll("_", " ").toUpperCase().trim();
     }
 
     public void setName(String name) {
