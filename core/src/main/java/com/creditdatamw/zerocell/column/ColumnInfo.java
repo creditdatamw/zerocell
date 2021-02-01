@@ -48,7 +48,7 @@ public class ColumnInfo {
      * @return name of the column
      */
     public String getName() {
-        return name;
+        return name.toUpperCase();
     }
 
     /**
