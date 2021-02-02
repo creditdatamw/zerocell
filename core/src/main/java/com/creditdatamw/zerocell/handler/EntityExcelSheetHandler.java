@@ -259,4 +259,19 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
             }
         }
     }
+
+    private class EmptyColumnCounter {
+        private int count = 0;
+
+        void increment() {
+            this.count += 1;
+        }
+
+        boolean rowIsEmpty() {
+            return this.count >= columns.size();
+        }
+        void reset() {
+            count = 0;
+        }
+    }
 }
