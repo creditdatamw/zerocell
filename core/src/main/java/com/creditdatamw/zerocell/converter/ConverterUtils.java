@@ -31,15 +31,15 @@ public final class ConverterUtils {
         if (fieldType == String.class) {
             value = String.valueOf(formattedValue);
         } else if (fieldType == LocalDateTime.class) {
-            return Converters.toLocalDateTime
+            return defaultConverters.toLocalDateTime
                     .convert(formattedValue, columnName, rowNum);
 
         } else if (fieldType == LocalDate.class) {
-            return Converters.toLocalDate
+            return defaultConverters.toLocalDate
                     .convert(formattedValue, columnName, rowNum);
 
         } else if (fieldType == java.sql.Date.class) {
-            return Converters.toSqlDate
+            return defaultConverters.toSqlDate
                     .convert(formattedValue, columnName, rowNum);
 
         } else if (fieldType == Timestamp.class) {
@@ -47,15 +47,15 @@ public final class ConverterUtils {
                     .convert(formattedValue, columnName, rowNum);
 
         } else if (fieldType == Integer.class || fieldType == int.class) {
-            return Converters.toInteger
+            return defaultConverters.toInteger
                     .convert(formattedValue, columnName, rowNum);
 
         } else if (fieldType == Long.class || fieldType == long.class) {
-            return Converters.toLong
+            return defaultConverters.toLong
                     .convert(formattedValue, columnName, rowNum);
 
         } else if (fieldType == Double.class || fieldType == double.class) {
-            return Converters.toDouble
+            return defaultConverters.toDouble
                     .convert(formattedValue, columnName, rowNum);
 
         } else if (fieldType == Float.class || fieldType == float.class) {

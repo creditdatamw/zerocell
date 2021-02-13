@@ -11,6 +11,6 @@ public class TestRowNumberInfo {
 
         assertEquals("rowNo", rowNumberInfo.getFieldName());
         assertEquals(Integer.class, rowNumberInfo.getType());
-        assertEquals("__rowNUmber__", rowNumberInfo.getName());
+        assertEquals("__ROWNUMBER__", rowNumberInfo.getName());
     }
 }
