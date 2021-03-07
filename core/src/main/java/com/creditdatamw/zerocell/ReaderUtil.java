@@ -7,7 +7,7 @@ import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackageAccess;
 import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.util.SAXHelper;
+import org.apache.poi.util.XMLHelper;
 import org.apache.poi.xssf.eventusermodel.ReadOnlySharedStringsTable;
 import org.apache.poi.xssf.eventusermodel.XSSFReader;
 import org.apache.poi.xssf.eventusermodel.XSSFSheetXMLHandler;
@@ -119,7 +119,7 @@ public final class ReaderUtil {
                 throw new SheetNotFoundException(sheetName);
             }
 
-            XMLReader xmlReader = SAXHelper.newXMLReader();
+            XMLReader xmlReader = XMLHelper.newXMLReader();
             xmlReader.setContentHandler(new XSSFSheetXMLHandler(stylesTable, strings, reader, dataFormatter, false));
             xmlReader.parse(new InputSource(sheetInputStream));
             sheetInputStream.close();
