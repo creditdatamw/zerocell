@@ -48,7 +48,7 @@ public class CellMethodSpec {
                 .beginControlFlow("if(cellReference == null)")
                 .addStatement("cellReference = new $T(currentRow, currentCol).formatAsString()", org.apache.poi.ss.util.CellAddress.class)
                 .endControlFlow()
-                .addStatement("int column = new $T(cellReference).getCol()", org.apache.poi.hssf.util.CellReference.class)
+                .addStatement("int column = new $T(cellReference).getCol()", org.apache.poi.ss.util.CellReference.class)
                 .addStatement("currentCol = column")
                 .addCode(builder.build())
                 .build();
