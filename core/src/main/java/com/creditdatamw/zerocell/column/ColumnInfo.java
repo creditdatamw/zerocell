@@ -1,5 +1,6 @@
 package com.creditdatamw.zerocell.column;
 
+import com.creditdatamw.zerocell.converter.FallbackStrategy;
 import com.creditdatamw.zerocell.annotation.Column;
 import com.creditdatamw.zerocell.converter.NoopConverter;
 import org.slf4j.LoggerFactory;
@@ -25,22 +26,28 @@ public class ColumnInfo {
 
     private Class<?> converterClass;
 
+    private FallbackStrategy fallbackStrategy;
+
     public ColumnInfo(String name, String fieldName, int index, Class<?> dataType) {
-        this.name = name;
-        this.fieldName = fieldName;
-        this.index = index;
-        this.dataFormat = "";
-        this.type = dataType;
-        this.converterClass = NoopConverter.class;
+        this(name, fieldName, index, "", dataType, NoopConverter.class);
+    }
+
+    public ColumnInfo(String name, String fieldName, int index, Class<?> dataType, FallbackStrategy fallbackStrategy) {
+        this(name, fieldName, index, "", dataType, NoopConverter.class, fallbackStrategy);
     }
 
     public ColumnInfo(String name, String fieldName, int index, String dataFormat, Class<?> type, Class<?> converterClass) {
+        this(name, fieldName, index, dataFormat, type, converterClass, FallbackStrategy.DEFAULT);
+    }
+
+    public ColumnInfo(String name, String fieldName, int index, String dataFormat, Class<?> type, Class<?> converterClass, FallbackStrategy fallbackStrategy) {
         this.name = name;
         this.fieldName = fieldName;
         this.index = index;
         this.dataFormat = dataFormat;
         this.type = type;
         this.converterClass = converterClass;
+        this.fallbackStrategy = fallbackStrategy;
     }
 
     /**
@@ -48,7 +55,7 @@ public class ColumnInfo {
      * @return name of the column
      */
     public String getName() {
-        return name.toUpperCase();
+        return name.toUpperCase().trim();
     }
 
     /**
@@ -85,6 +92,10 @@ public class ColumnInfo {
 
     public Class<?> getConverterClass() {
         return converterClass;
+    }
+
+    public FallbackStrategy getFallbackStrategy() {
+        return fallbackStrategy;
     }
 
     /**

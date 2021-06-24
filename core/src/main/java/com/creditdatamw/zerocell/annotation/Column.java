@@ -1,5 +1,6 @@
 package com.creditdatamw.zerocell.annotation;
 
+import com.creditdatamw.zerocell.converter.FallbackStrategy;
 import com.creditdatamw.zerocell.converter.NoopConverter;
 
 import java.lang.annotation.ElementType;
@@ -30,6 +31,12 @@ public @interface Column {
      * @return Format for the value of the column, iff applicable
      */
     String dataFormat() default "";
+
+    /**
+     *
+     * @return Format for the value of the column, iff applicable
+     */
+    FallbackStrategy fallback() default FallbackStrategy.DEFAULT;
 
     /**
      *
