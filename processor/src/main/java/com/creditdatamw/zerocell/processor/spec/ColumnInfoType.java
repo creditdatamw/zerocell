@@ -37,7 +37,7 @@ class ColumnInfoType {
     }
 
     public String getName() {
-        return name.toUpperCase();
+        return name.toUpperCase().trim();
     }
 
     public void setName(String name) {
