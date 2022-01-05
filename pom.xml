@@ -5,7 +5,7 @@
 
 	<groupId>com.creditdatamw.labs</groupId>
     <artifactId>zerocell-parent</artifactId>
-    <version>0.5.1</version>
+    <version>0.5.2-SNAPSHOT</version>
     <packaging>pom</packaging>
     <url>https://github.com/creditdatamw/zerocell</url>
 
@@ -43,7 +43,7 @@
         <connection>scm:git:git://github.com/creditdatamw/zerocell.git</connection>
         <developerConnection>scm:git:git@github.com:creditdatamw/zerocell.git</developerConnection>
         <url>https://github.com/creditdatamw/zerocell</url>
-        <tag>v0.5.1</tag>
+        <tag>master</tag>
     </scm>
     <issueManagement>
         <system>GitHub</system>
