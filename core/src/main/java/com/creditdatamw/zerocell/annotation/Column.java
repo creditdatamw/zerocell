@@ -43,4 +43,10 @@ public @interface Column {
      * @return Converter to use to convert the string value to the field type's value
      */
     Class<?> converterClass() default NoopConverter.class;
+
+    /**
+     *
+     * @return Whether to treat the name as a regular expression or not
+     */
+    boolean nameRegex() default false;
 }

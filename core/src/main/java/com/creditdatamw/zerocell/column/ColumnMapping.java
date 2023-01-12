@@ -67,7 +67,8 @@ public final class ColumnMapping {
                         annotation.dataFormat(),
                         field.getType(),
                         converter,
-                        annotation.fallback()));
+                        annotation.fallback(),
+                        annotation.nameRegex()));
             }
         }
 

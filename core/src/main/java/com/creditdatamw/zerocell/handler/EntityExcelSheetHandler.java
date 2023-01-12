@@ -16,6 +16,8 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.creditdatamw.zerocell.converter.ConverterUtils.convertValueToType;
 
@@ -60,7 +62,8 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
 
     /**
      * Returns a list of entities loaded from the provided Excel file
-     * @param file the Excel file to load data from
+     *
+     * @param file  the Excel file to load data from
      * @param sheet the sheet to load data from
      * @return list of entities from the sheet
      */
@@ -107,7 +110,7 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
 
     private boolean isRowNumberValueSetted() {
         return entityHandler.getMaxRowNumber() != 0 &&
-            entityHandler.getMaxRowNumber() != entityHandler.getSkipFirstNRows();
+                entityHandler.getMaxRowNumber() != entityHandler.getSkipFirstNRows();
     }
 
     @Override
@@ -141,9 +144,19 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
         }
 
         if (isHeaderRow && !entityHandler.isSkipHeaderRow()) {
-            if (!currentColumnInfo.getName().equalsIgnoreCase(formattedValue.trim())) {
-                throw new ZeroCellException(String.format("Expected Column '%s' but found '%s'", currentColumnInfo.getName(), formattedValue));
+
+            if (currentColumnInfo.getNameRegex()) {
+                Pattern pattern = Pattern.compile(currentColumnInfo.getName());
+                Matcher m = pattern.matcher(formattedValue.trim());
+                if (!m.matches()) {
+                    throw new ZeroCellException(String.format("'%s' Does not match '%s'", formattedValue, currentColumnInfo.getName()));
+                }
+            } else {
+                if (!currentColumnInfo.getName().equalsIgnoreCase(formattedValue.trim())) {
+                    throw new ZeroCellException(String.format("Expected Column '%s' but found '%s'", currentColumnInfo.getName(), formattedValue));
+                }
             }
+            
         }
         // Prevent from trying to write to a null instance
         if (Objects.isNull(cur)) return;
@@ -171,15 +184,15 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
         }
         try {
             Field field = entityHandler.getEntityClass()
-                .getDeclaredField(currentColumnInfo.getFieldName());
+                    .getDeclaredField(currentColumnInfo.getFieldName());
 
             columnFieldWriter.writeColumnField(
-                field,
-                cur,
-                formattedValue,
-                currentColumnInfo,
-                rowNum,
-                converter
+                    field,
+                    cur,
+                    formattedValue,
+                    currentColumnInfo,
+                    rowNum,
+                    converter
             );
         } catch (NoSuchFieldException e) {
             LOGGER.error("Failed to set field '{}' because it does not exist. Got 'NoSuchFieldException'", currentColumnInfo.getFieldName());
@@ -206,11 +219,11 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
          */
         @SuppressWarnings("unchecked")
         <T> void writeColumnField(Field field,
-                              T object,
-                              String formattedValue,
-                              ColumnInfo currentColumnInfo,
-                              int rowNum,
-                              Converter converter) {
+                                  T object,
+                                  String formattedValue,
+                                  ColumnInfo currentColumnInfo,
+                                  int rowNum,
+                                  Converter converter) {
 
             String fieldName = currentColumnInfo.getFieldName();
             try {
@@ -225,7 +238,7 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
                                 rowNum,
                                 currentColumnInfo.getFallbackStrategy()
                         );
-                    } catch(IgnoreInvalidValueException d) {
+                    } catch (IgnoreInvalidValueException d) {
                         // When this exception is thrown it means don't set any
                         // value of there was a failure to parse the formattedValue
                         // into the appropriate type
@@ -236,7 +249,7 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
                     try {
                         value = converter.convert(formattedValue, currentColumnInfo.getName(), rowNum);
                     } catch (Exception e) {
-                        String messageTemplate = "Failed to convert value '%s' at Column(name='%s', index='%s', row='%s')" ;
+                        String messageTemplate = "Failed to convert value '%s' at Column(name='%s', index='%s', row='%s')";
                         String message = String.format(messageTemplate,
                                 formattedValue,
                                 currentColumnInfo.getName(),
@@ -244,7 +257,7 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
                                 rowNum);
 
                         LoggerFactory.getLogger(EntityExcelSheetHandler.class)
-                            .warn(message + " using: " + converter.getClass().getName(), e);
+                                .warn(message + " using: " + converter.getClass().getName(), e);
                         throw new ZeroCellException(message + " using: " + converter.getClass().getSimpleName(), e);
                     }
                 }
@@ -270,6 +283,7 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
         boolean rowIsEmpty() {
             return this.count >= columns.size();
         }
+
         void reset() {
             count = 0;
         }

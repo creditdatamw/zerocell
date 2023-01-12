@@ -28,19 +28,37 @@ public class ColumnInfo {
 
     private FallbackStrategy fallbackStrategy;
 
+    private boolean nameRegex;
+
     public ColumnInfo(String name, String fieldName, int index, Class<?> dataType) {
         this(name, fieldName, index, "", dataType, NoopConverter.class);
+    }
+
+    public ColumnInfo(String name, String fieldName, int index, Class<?> dataType, boolean nameRegex) {
+        this(name, fieldName, index, "", dataType, NoopConverter.class, nameRegex);
     }
 
     public ColumnInfo(String name, String fieldName, int index, Class<?> dataType, FallbackStrategy fallbackStrategy) {
         this(name, fieldName, index, "", dataType, NoopConverter.class, fallbackStrategy);
     }
 
+    public ColumnInfo(String name, String fieldName, int index, Class<?> dataType, FallbackStrategy fallbackStrategy, boolean nameRegex) {
+        this(name, fieldName, index, "", dataType, NoopConverter.class, fallbackStrategy, nameRegex);
+    }
+
     public ColumnInfo(String name, String fieldName, int index, String dataFormat, Class<?> type, Class<?> converterClass) {
         this(name, fieldName, index, dataFormat, type, converterClass, FallbackStrategy.DEFAULT);
     }
 
+    public ColumnInfo(String name, String fieldName, int index, String dataFormat, Class<?> type, Class<?> converterClass, boolean nameRegex) {
+        this(name, fieldName, index, dataFormat, type, converterClass, FallbackStrategy.DEFAULT, nameRegex);
+    }
+
     public ColumnInfo(String name, String fieldName, int index, String dataFormat, Class<?> type, Class<?> converterClass, FallbackStrategy fallbackStrategy) {
+        this(name, fieldName, index, dataFormat, type, converterClass, fallbackStrategy, false);
+    }
+
+    public ColumnInfo(String name, String fieldName, int index, String dataFormat, Class<?> type, Class<?> converterClass, FallbackStrategy fallbackStrategy, boolean nameRegex) {
         this.name = name;
         this.fieldName = fieldName;
         this.index = index;
@@ -48,10 +66,12 @@ public class ColumnInfo {
         this.type = type;
         this.converterClass = converterClass;
         this.fallbackStrategy = fallbackStrategy;
+        this.nameRegex = nameRegex;
     }
 
     /**
      * Name of the column in the Excel file
+     *
      * @return name of the column
      */
     public String getName() {
@@ -60,6 +80,7 @@ public class ColumnInfo {
 
     /**
      * Name of the field/attribute in the class
+     *
      * @return name of the field in the class
      */
     public String getFieldName() {
@@ -68,6 +89,7 @@ public class ColumnInfo {
 
     /**
      * Index of the column in the Excel file
+     *
      * @return column index
      */
     public int getIndex() {
@@ -76,6 +98,7 @@ public class ColumnInfo {
 
     /**
      * Data format specification.
+     *
      * @return data format specification
      */
     public String getDataFormat() {
@@ -84,6 +107,7 @@ public class ColumnInfo {
 
     /**
      * Class of the type of the data expected at that column in the Excel file
+     *
      * @return Class instance
      */
     public Class<?> getType() {
@@ -96,6 +120,10 @@ public class ColumnInfo {
 
     public FallbackStrategy getFallbackStrategy() {
         return fallbackStrategy;
+    }
+
+    public boolean getNameRegex() {
+        return nameRegex;
     }
 
     /**
@@ -129,7 +157,7 @@ public class ColumnInfo {
 
         LoggerFactory.getLogger(ColumnInfo.class).debug(String.format("Found %s columns in class %s", columnNames.length, clazz.getName()));
 
-        for(Column annotation: columns) {
+        for (Column annotation : columns) {
             columnNames[annotation.index()] = annotation.name().trim();
         }
         columns = null;
