@@ -126,6 +126,10 @@ public class ColumnInfo {
         return nameRegex;
     }
 
+    public String getRawName() {
+        return name;
+    }
+
     /**
      * Finds and extacts {@link Column} annotations from the provided class
      *

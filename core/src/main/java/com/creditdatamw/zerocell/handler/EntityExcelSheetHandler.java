@@ -146,7 +146,7 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
         if (isHeaderRow && !entityHandler.isSkipHeaderRow()) {
 
             if (currentColumnInfo.getNameRegex()) {
-                Pattern pattern = Pattern.compile(currentColumnInfo.getName());
+                Pattern pattern = Pattern.compile(currentColumnInfo.getRawName());
                 Matcher m = pattern.matcher(formattedValue.trim());
                 if (!m.matches()) {
                     throw new ZeroCellException(String.format("'%s' Does not match '%s'", formattedValue, currentColumnInfo.getName()));
