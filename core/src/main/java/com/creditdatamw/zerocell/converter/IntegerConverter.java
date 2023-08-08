@@ -9,7 +9,7 @@ public class IntegerConverter extends DefaultConverter<Integer> {
     @Override
     public Integer convert(String value, String columnName, int row) {
         try {
-            return Integer.parseInt(value);
+            return Integer.parseInt(value.trim());
         } catch (Exception e) {
             switch (this.getFallbackStrategy()) {
                 case LEGACY:
