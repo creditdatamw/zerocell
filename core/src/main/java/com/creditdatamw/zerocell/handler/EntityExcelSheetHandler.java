@@ -213,6 +213,14 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
                               Converter converter) {
 
             String fieldName = currentColumnInfo.getFieldName();
+            // For values that come with comma's sanitize the input
+            Class<?> fieldType = currentColumnInfo.getType();
+            if (fieldType == Integer.class || fieldType == int.class ||
+                    fieldType == Long.class || fieldType == long.class || fieldType == Double.class ||
+                    fieldType == double.class || fieldType == Float.class || fieldType == float.class) {
+                formattedValue = formattedValue.replace(",", "");
+            }
+
             try {
                 Object value = null;
                 // Don't use a converter if there isn't a custom one
