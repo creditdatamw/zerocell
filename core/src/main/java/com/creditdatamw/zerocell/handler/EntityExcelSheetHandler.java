@@ -213,7 +213,6 @@ final class EntityExcelSheetHandler<T> implements ZeroCellReader {
                               Converter converter) {
 
             String fieldName = currentColumnInfo.getFieldName();
-
             // For values that come with comma's sanitize the input
             Class<?> fieldType = currentColumnInfo.getType();
             if (fieldType == Integer.class || fieldType == int.class ||

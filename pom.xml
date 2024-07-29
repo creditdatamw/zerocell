@@ -5,7 +5,9 @@
 
 	<groupId>com.creditdatamw.labs</groupId>
     <artifactId>zerocell-parent</artifactId>
+
     <version>0.5.2-SNAPSHOT</version>
+
     <packaging>pom</packaging>
     <url>https://github.com/creditdatamw/zerocell</url>
 
@@ -98,8 +100,14 @@
             </dependency>
             <dependency>
                 <groupId>org.apache.poi</groupId>
-                <artifactId>poi-excelant</artifactId>
+                <artifactId>poi-ooxml</artifactId>
                 <version>${poi.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.xmlgraphics</groupId>
+                        <artifactId>batik-all</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>

@@ -28,4 +28,17 @@ public class TestConverterUtils {
         assertEquals(-1L, convertValueToType(Long.class, "-1", "A", 1, FallbackStrategy.DEFAULT));
         assertEquals(1L, convertValueToType(Long.class, "1", "A", 1, FallbackStrategy.DEFAULT));
     }
+
+    @Test
+    public void testConvertValuesToLong() {
+        assertNotEquals(Long.MIN_VALUE, convertValueToType(Long.class, "Hello", "A", 1));
+        assertEquals(null, convertValueToType(Long.class, "Hello", "A", 1));
+
+        long v = (long) convertValueToType(Long.class, "Hello", "A", 1);
+        assertEquals(Long.MIN_VALUE, v);
+
+        assertEquals(Long.MIN_VALUE, convertValueToType(Long.class, "2 + 2", "A", 1));
+        assertEquals(-1, convertValueToType(Long.class, "-1", "A", 1));
+        assertEquals(1, convertValueToType(Long.class, "1.0", "A", 1));
+    }
 }
